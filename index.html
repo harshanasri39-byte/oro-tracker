@@ -206,7 +206,7 @@
                   <span id="calc-preview-qa-actual-amount" class="hidden text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/80 px-2 py-0.5 rounded-full"></span>
                 </div>
                 <input type="text" id="qa-actual-amount" inputmode="text"
-                  onfocus="attachMobileCalcBar(this)" onblur="commitMathInput(this); detachMobileCalcBar()"
+                  onblur="commitMathInput(this)"
                   oninput="previewMathInput(this)" onkeydown="handleMathKeydown(event, this)"
                   class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-3 text-lg font-extrabold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all tabular-nums" />
               </div>
@@ -303,7 +303,7 @@
                     <span id="calc-preview-qa-income" class="hidden text-[10px] font-bold text-sky-700 dark:text-sky-300"></span>
                   </div>
                   <input type="text" id="qa-income" inputmode="text"
-                    onfocus="attachMobileCalcBar(this)" onblur="commitMathInput(this); detachMobileCalcBar()"
+                    onblur="commitMathInput(this)"
                     oninput="previewMathInput(this)" onkeydown="handleMathKeydown(event, this)"
                     class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-bold text-slate-900 dark:text-white outline-none tabular-nums" />
                 </div>
@@ -314,7 +314,7 @@
                     <span id="calc-preview-qa-investment" class="hidden text-[10px] font-bold text-emerald-700 dark:text-emerald-300"></span>
                   </div>
                   <input type="text" id="qa-investment" inputmode="text"
-                    onfocus="attachMobileCalcBar(this)" onblur="commitMathInput(this); detachMobileCalcBar()"
+                    onblur="commitMathInput(this)"
                     oninput="previewMathInput(this)" onkeydown="handleMathKeydown(event, this)"
                     class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-bold text-slate-900 dark:text-white outline-none tabular-nums" />
                 </div>
@@ -325,7 +325,7 @@
                     <span id="calc-preview-qa-usd" class="hidden text-[10px] font-bold text-slate-600 dark:text-slate-300"></span>
                   </div>
                   <input type="text" id="qa-usd" inputmode="text"
-                    onfocus="attachMobileCalcBar(this)" onblur="commitMathInput(this); detachMobileCalcBar()"
+                    onblur="commitMathInput(this)"
                     oninput="previewMathInput(this)" onkeydown="handleMathKeydown(event, this)"
                     class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-bold text-slate-900 dark:text-white outline-none tabular-nums" />
                 </div>
@@ -336,7 +336,7 @@
                     <span id="calc-preview-qa-gbp" class="hidden text-[10px] font-bold text-slate-600 dark:text-slate-300"></span>
                   </div>
                   <input type="text" id="qa-gbp" inputmode="text"
-                    onfocus="attachMobileCalcBar(this)" onblur="commitMathInput(this); detachMobileCalcBar()"
+                    onblur="commitMathInput(this)"
                     oninput="previewMathInput(this)" onkeydown="handleMathKeydown(event, this)"
                     class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-bold text-slate-900 dark:text-white outline-none tabular-nums" />
                 </div>
@@ -452,7 +452,7 @@
                   <span id="calc-preview-pb-budget-amount" class="hidden text-[11px] font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950 px-2 py-0.5 rounded-full"></span>
                 </div>
                 <input type="text" id="pb-budget-amount" required inputmode="text"
-                  onfocus="attachMobileCalcBar(this)" onblur="commitMathInput(this); detachMobileCalcBar()"
+                  onblur="commitMathInput(this)"
                   oninput="previewMathInput(this)" onkeydown="handleMathKeydown(event, this)"
                   class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-3 text-base font-extrabold text-slate-900 dark:text-white outline-none tabular-nums" />
               </div>
@@ -511,45 +511,71 @@
     <section id="page-dashboard" class="page-view space-y-5">
       <!-- Top Filter Slicers -->
       <div class="bg-white dark:bg-slate-900 rounded-3xl p-3.5 sm:p-4 border border-slate-200 dark:border-slate-800 shadow-2xs">
-        <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full">
-          <select id="dash-year" onchange="renderDashboard()"
-            class="w-full sm:w-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
-            <option value="ALL">All Years</option>
-          </select>
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <h1 class="hidden md:block text-xl font-extrabold text-slate-900 dark:text-white tracking-tight shrink-0">Dashboard</h1>
 
-          <select id="dash-month" onchange="renderDashboard()"
-            class="w-full sm:w-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
-            <option value="ALL">All Months</option>
-            <option value="Jan">Jan</option><option value="Feb">Feb</option><option value="Mar">Mar</option>
-            <option value="Apr">Apr</option><option value="May">May</option><option value="Jun">Jun</option>
-            <option value="Jul">Jul</option><option value="Aug">Aug</option><option value="Sep">Sep</option>
-            <option value="Oct">Oct</option><option value="Nov">Nov</option><option value="Dec">Dec</option>
-          </select>
+          <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full md:w-auto">
+            <select id="dash-year" onchange="renderDashboard()"
+              class="w-full sm:w-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
+              <option value="ALL">All Years</option>
+            </select>
 
-          <select id="dash-cat1" onchange="renderDashboard()"
-            class="w-full sm:w-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
-            <option value="ALL">All Categories</option>
-          </select>
+            <select id="dash-month" onchange="renderDashboard()"
+              class="w-full sm:w-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
+              <option value="ALL">All Months</option>
+              <option value="Jan">Jan</option><option value="Feb">Feb</option><option value="Mar">Mar</option>
+              <option value="Apr">Apr</option><option value="May">May</option><option value="Jun">Jun</option>
+              <option value="Jul">Jul</option><option value="Aug">Aug</option><option value="Sep">Sep</option>
+              <option value="Oct">Oct</option><option value="Nov">Nov</option><option value="Dec">Dec</option>
+            </select>
 
-          <select id="dash-cat2" onchange="renderDashboard()"
-            class="w-full sm:w-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
-            <option value="ALL">All Alt Categories</option>
-          </select>
+            <!-- Multi-Select Category Checkbox Dropdown (All Ticked by Default) -->
+            <div class="relative w-full sm:w-auto" id="dash-cat1-wrapper">
+              <button type="button" onclick="toggleDashMultiDropdown('dash-cat1-menu')" id="dash-cat1-btn"
+                class="w-full sm:w-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none flex items-center justify-between gap-2 cursor-pointer">
+                <span id="dash-cat1-label" class="truncate">All Categories</span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
+              </button>
+              <div id="dash-cat1-menu" class="cat-combo-menu hidden absolute z-30 left-0 mt-1.5 w-60 max-h-64 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl p-2 space-y-1">
+                <div class="flex items-center justify-between px-2 py-1 border-b border-slate-100 dark:border-slate-800 text-[11px] font-bold">
+                  <button type="button" onclick="setAllDashCategories('cat1', true)" class="text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer">Select All</button>
+                  <button type="button" onclick="setAllDashCategories('cat1', false)" class="text-slate-500 hover:underline cursor-pointer">Clear</button>
+                </div>
+                <div id="dash-cat1-options" class="space-y-0.5 pt-1"></div>
+              </div>
+            </div>
 
-          <select id="dash-tag" onchange="renderDashboard()"
-            class="w-full sm:w-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
-            <option value="ALL">All Tags</option>
-          </select>
+            <!-- Multi-Select Alt Category Checkbox Dropdown (All Ticked by Default) -->
+            <div class="relative w-full sm:w-auto" id="dash-cat2-wrapper">
+              <button type="button" onclick="toggleDashMultiDropdown('dash-cat2-menu')" id="dash-cat2-btn"
+                class="w-full sm:w-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none flex items-center justify-between gap-2 cursor-pointer">
+                <span id="dash-cat2-label" class="truncate">All Alt Categories</span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
+              </button>
+              <div id="dash-cat2-menu" class="cat-combo-menu hidden absolute z-30 right-0 sm:left-0 sm:right-auto mt-1.5 w-60 max-h-64 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl p-2 space-y-1">
+                <div class="flex items-center justify-between px-2 py-1 border-b border-slate-100 dark:border-slate-800 text-[11px] font-bold">
+                  <button type="button" onclick="setAllDashCategories('cat2', true)" class="text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer">Select All</button>
+                  <button type="button" onclick="setAllDashCategories('cat2', false)" class="text-slate-500 hover:underline cursor-pointer">Clear</button>
+                </div>
+                <div id="dash-cat2-options" class="space-y-0.5 pt-1"></div>
+              </div>
+            </div>
 
-          <label class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
-            <input type="checkbox" id="dash-as-of-today" checked onchange="renderDashboard()" class="rounded text-indigo-600 w-3.5 h-3.5" />
-            <span>As of Today</span>
-          </label>
+            <select id="dash-tag" onchange="renderDashboard()"
+              class="w-full sm:w-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
+              <option value="ALL">All Tags</option>
+            </select>
 
-          <button type="button" onclick="resetDashboardFilters()" id="btn-dash-reset"
-            class="col-span-2 sm:col-span-1 hidden px-3 py-2 rounded-xl text-xs font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 cursor-pointer">
-            Reset
-          </button>
+            <label class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
+              <input type="checkbox" id="dash-as-of-today" checked onchange="renderDashboard()" class="rounded text-indigo-600 w-3.5 h-3.5" />
+              <span>As of Today</span>
+            </label>
+
+            <button type="button" onclick="resetDashboardFilters()" id="btn-dash-reset"
+              class="col-span-2 sm:col-span-1 hidden px-3 py-2 rounded-xl text-xs font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 cursor-pointer">
+              Reset
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1121,7 +1147,7 @@
               <span id="calc-preview-mod-actual-amount" class="hidden text-[10px] font-bold text-emerald-700 dark:text-emerald-300"></span>
             </div>
             <input type="text" id="mod-actual-amount" inputmode="text"
-              onfocus="attachMobileCalcBar(this)" onblur="commitMathInput(this); detachMobileCalcBar()"
+              onblur="commitMathInput(this)"
               oninput="previewMathInput(this)" onkeydown="handleMathKeydown(event, this)"
               class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2.5 text-sm font-extrabold text-slate-900 dark:text-white outline-none tabular-nums" />
           </div>
@@ -1129,40 +1155,12 @@
 
         <div>
           <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Description *</label>
-          <input type="text" id="mod-task" required
-            class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white outline-none" />
-        </div>
-
-        <div class="grid grid-cols-2 gap-3.5">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Category</label>
-            <div class="relative">
-              <input type="text" id="mod-cat1" autocomplete="off"
-                onfocus="openCategoryDropdown('mod-cat1')"
-                oninput="filterCategoryDropdown('mod-cat1'); mirrorCategoryToAlt('mod-cat1', 'mod-cat2')"
-                onkeydown="handleCategoryKeydown(event, 'mod-cat1', 'mod-cat2')"
-                class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 pl-3 pr-8 py-2.5 text-xs font-semibold text-slate-900 dark:text-white outline-none" />
-              <button type="button" tabindex="-1" onclick="toggleCategoryDropdown('mod-cat1')"
-                class="absolute inset-y-0 right-0 px-2.5 flex items-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer">
-                <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
-              </button>
-              <div id="mod-cat1-dropdown" class="cat-combo-menu hidden absolute z-30 left-0 right-0 mt-1 max-h-44 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg py-1"></div>
-            </div>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Alt Category</label>
-            <div class="relative">
-              <input type="text" id="mod-cat2" autocomplete="off"
-                onfocus="openCategoryDropdown('mod-cat2')"
-                oninput="this.dataset.customized = 'true'; filterCategoryDropdown('mod-cat2')"
-                onkeydown="handleCategoryKeydown(event, 'mod-cat2')"
-                class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 pl-3 pr-8 py-2.5 text-xs font-semibold text-slate-900 dark:text-white outline-none" />
-              <button type="button" tabindex="-1" onclick="toggleCategoryDropdown('mod-cat2')"
-                class="absolute inset-y-0 right-0 px-2.5 flex items-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer">
-                <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
-              </button>
-              <div id="mod-cat2-dropdown" class="cat-combo-menu hidden absolute z-30 left-0 right-0 mt-1 max-h-44 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg py-1"></div>
-            </div>
+          <div class="relative">
+            <input type="text" id="mod-task" required autocomplete="off"
+              oninput="filterTaskDropdown('mod-task')"
+              onkeydown="handleTaskKeydown(event, 'mod-task')"
+              class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white outline-none" />
+            <div id="mod-task-dropdown" class="cat-combo-menu hidden absolute z-30 left-0 right-0 mt-1 max-h-44 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg py-1"></div>
           </div>
         </div>
 
@@ -1178,7 +1176,7 @@
               <span id="calc-preview-mod-budget-amount" class="hidden text-[10px] font-bold text-indigo-700 dark:text-indigo-300"></span>
             </div>
             <input type="text" id="mod-budget-amount" inputmode="text"
-              onfocus="attachMobileCalcBar(this)" onblur="commitMathInput(this); detachMobileCalcBar()"
+              onblur="commitMathInput(this)"
               oninput="previewMathInput(this)" onkeydown="handleMathKeydown(event, this)"
               class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none tabular-nums" />
           </div>
@@ -1187,22 +1185,22 @@
         <div class="grid grid-cols-4 gap-2">
           <div>
             <label class="block text-[10px] font-bold text-sky-600 mb-1">Income</label>
-            <input type="text" id="mod-income" inputmode="text" onfocus="attachMobileCalcBar(this)" onblur="commitMathInput(this); detachMobileCalcBar()"
+            <input type="text" id="mod-income" inputmode="text" onblur="commitMathInput(this)"
               class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-2.5 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none" />
           </div>
           <div>
             <label class="block text-[10px] font-bold text-emerald-600 mb-1">Invest</label>
-            <input type="text" id="mod-investment" inputmode="text" onfocus="attachMobileCalcBar(this)" onblur="commitMathInput(this); detachMobileCalcBar()"
+            <input type="text" id="mod-investment" inputmode="text" onblur="commitMathInput(this)"
               class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-2.5 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none" />
           </div>
           <div>
             <label class="block text-[10px] font-bold text-slate-500 mb-1">USD</label>
-            <input type="text" id="mod-usd" inputmode="text" onfocus="attachMobileCalcBar(this)" onblur="commitMathInput(this); detachMobileCalcBar()"
+            <input type="text" id="mod-usd" inputmode="text" onblur="commitMathInput(this)"
               class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-2.5 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none" />
           </div>
           <div>
             <label class="block text-[10px] font-bold text-slate-500 mb-1">GBP</label>
-            <input type="text" id="mod-gbp" inputmode="text" onfocus="attachMobileCalcBar(this)" onblur="commitMathInput(this); detachMobileCalcBar()"
+            <input type="text" id="mod-gbp" inputmode="text" onblur="commitMathInput(this)"
               class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-2.5 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none" />
           </div>
         </div>
@@ -1273,19 +1271,6 @@
   <!-- Toast Notification -->
   <div id="toast-container" class="fixed bottom-6 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-  <!-- Mobile Math Quick-Symbol Toolbar (Appears above mobile keyboard for calculation inputs) -->
-  <div id="mobile-calc-bar" class="hidden md:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-900/95 dark:bg-slate-800/95 backdrop-blur-md border-t border-slate-700 px-2 py-1.5 flex items-center justify-between gap-1.5 shadow-2xl">
-    <div class="flex items-center gap-1 flex-1">
-      <button type="button" onmousedown="insertCalcOperator(event, '+')" class="flex-1 py-2 rounded-lg bg-slate-800 dark:bg-slate-700 active:bg-emerald-600 text-white font-extrabold text-sm cursor-pointer">+</button>
-      <button type="button" onmousedown="insertCalcOperator(event, '-')" class="flex-1 py-2 rounded-lg bg-slate-800 dark:bg-slate-700 active:bg-emerald-600 text-white font-extrabold text-sm cursor-pointer">−</button>
-      <button type="button" onmousedown="insertCalcOperator(event, '*')" class="flex-1 py-2 rounded-lg bg-slate-800 dark:bg-slate-700 active:bg-emerald-600 text-white font-extrabold text-sm cursor-pointer">×</button>
-      <button type="button" onmousedown="insertCalcOperator(event, '/')" class="flex-1 py-2 rounded-lg bg-slate-800 dark:bg-slate-700 active:bg-emerald-600 text-white font-extrabold text-sm cursor-pointer">÷</button>
-      <button type="button" onmousedown="insertCalcOperator(event, '(')" class="flex-1 py-2 rounded-lg bg-slate-800 dark:bg-slate-700 active:bg-emerald-600 text-white font-bold text-xs cursor-pointer">(</button>
-      <button type="button" onmousedown="insertCalcOperator(event, ')')" class="flex-1 py-2 rounded-lg bg-slate-800 dark:bg-slate-700 active:bg-emerald-600 text-white font-bold text-xs cursor-pointer">)</button>
-    </div>
-    <button type="button" onmousedown="evaluateActiveCalcInput(event)" class="px-3.5 py-2 rounded-lg bg-emerald-600 active:bg-emerald-700 text-white font-extrabold text-sm cursor-pointer">=</button>
-  </div>
-
   <!-- Mobile Floating Quick-Entry (+) Button -->
   <button type="button" id="mobile-fab-entry" onclick="navigateTo('entry')" aria-label="Quick Entry"
     class="md:hidden fixed bottom-5 right-5 z-40 w-13 h-13 p-3.5 rounded-full bg-slate-900 dark:bg-emerald-600 text-white shadow-lg shadow-slate-900/25 dark:shadow-emerald-950/50 hover:scale-105 active:scale-95 flex items-center justify-center transition-all cursor-pointer">
@@ -1347,7 +1332,8 @@
     let barChartInstance = null;
     let activeDrilldownContext = null;
     let pivotSortState = { key: "spent", dir: "desc" };
-    let activeMobileCalcInput = null;
+    let excludedDashCategories = new Set();
+    let excludedDashAltCategories = new Set();
     let supabaseClient = null;
     let supabaseUser = null;
     let cloudSyncTimer = null;
@@ -1506,44 +1492,6 @@
           commitMathInput(inputEl);
         }
       }
-    }
-
-    function attachMobileCalcBar(inputEl) {
-      activeMobileCalcInput = inputEl;
-      const bar = document.getElementById("mobile-calc-bar");
-      if (bar && window.innerWidth < 768) {
-        bar.classList.remove("hidden");
-      }
-    }
-
-    function detachMobileCalcBar() {
-      setTimeout(() => {
-        if (document.activeElement !== activeMobileCalcInput) {
-          const bar = document.getElementById("mobile-calc-bar");
-          if (bar) bar.classList.add("hidden");
-          activeMobileCalcInput = null;
-        }
-      }, 120);
-    }
-
-    function insertCalcOperator(e, op) {
-      e.preventDefault();
-      if (!activeMobileCalcInput) return;
-      const el = activeMobileCalcInput;
-      const start = el.selectionStart ?? el.value.length;
-      const end = el.selectionEnd ?? el.value.length;
-      el.value = el.value.slice(0, start) + op + el.value.slice(end);
-      const nextPos = start + op.length;
-      el.setSelectionRange(nextPos, nextPos);
-      el.focus();
-      previewMathInput(el);
-    }
-
-    function evaluateActiveCalcInput(e) {
-      e.preventDefault();
-      if (!activeMobileCalcInput) return;
-      commitMathInput(activeMobileCalcInput);
-      activeMobileCalcInput.focus();
     }
 
     /* ===================================================================== */
@@ -1932,23 +1880,39 @@
     /* MOBILE-FRIENDLY TASK / DESCRIPTION SUGGESTIONS DROPDOWN               */
     /* ===================================================================== */
     function getSortedUniqueTasks() {
-      const freqMap = new Map();
-      records.forEach(r => {
+      const statsMap = new Map();
+      records.forEach((r, idx) => {
         if (!r.task) return;
         const key = r.task.trim();
-        freqMap.set(key, (freqMap.get(key) || 0) + 1);
+        if (!key) return;
+        const lower = key.toLowerCase();
+        const prev = statsMap.get(lower);
+        if (prev) {
+          prev.count += 1;
+          prev.lastIdx = idx;
+          prev.label = key;
+        } else {
+          statsMap.set(lower, { label: key, count: 1, lastIdx: idx });
+        }
       });
-      return Array.from(freqMap.entries())
-        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-        .map(entry => entry[0]);
+      return Array.from(statsMap.values())
+        .sort((a, b) => b.count - a.count || b.lastIdx - a.lastIdx || a.label.localeCompare(b.label))
+        .map(entry => entry.label);
     }
 
     function renderTaskDropdownItems(inputId, filterText = "") {
       const menu = document.getElementById(`${inputId}-dropdown`);
       if (!menu) return;
-      const allTasks = getSortedUniqueTasks();
       const q = filterText.trim().toLowerCase();
-      const matches = (q ? allTasks.filter(t => t.toLowerCase().includes(q)) : allTasks).slice(0, 20);
+      if (q.length < 2) {
+        menu.classList.add("hidden");
+        return;
+      }
+
+      const allTasks = getSortedUniqueTasks();
+      const startsWithMatches = allTasks.filter(t => t.toLowerCase().startsWith(q));
+      const containsMatches = allTasks.filter(t => !t.toLowerCase().startsWith(q) && t.toLowerCase().includes(q));
+      const matches = [...startsWithMatches, ...containsMatches].slice(0, 15);
 
       if (matches.length === 0) {
         menu.classList.add("hidden");
@@ -2526,11 +2490,64 @@
     /* ===================================================================== */
     /* DASHBOARD ANALYTICS & CHARTS                                          */
     /* ===================================================================== */
+    function toggleDashMultiDropdown(menuId) {
+      const menu = document.getElementById(menuId);
+      if (!menu) return;
+      const wasHidden = menu.classList.contains("hidden");
+      document.querySelectorAll(".cat-combo-menu").forEach(m => m.classList.add("hidden"));
+      if (wasHidden) menu.classList.remove("hidden");
+    }
+
+    function toggleDashCategory(dim, catName, isChecked) {
+      const targetSet = dim === "cat2" ? excludedDashAltCategories : excludedDashCategories;
+      if (isChecked) {
+        targetSet.delete(catName);
+      } else {
+        targetSet.add(catName);
+      }
+      updateDashCatButtonLabel(dim);
+      renderDashboard();
+    }
+
+    function setAllDashCategories(dim, selectAll) {
+      const allCats = getSortedCategories();
+      if (dim === "cat2") {
+        excludedDashAltCategories = selectAll ? new Set() : new Set(allCats);
+        document.querySelectorAll(".dash-cat2-chk").forEach(cb => { cb.checked = selectAll; });
+      } else {
+        excludedDashCategories = selectAll ? new Set() : new Set(allCats);
+        document.querySelectorAll(".dash-cat1-chk").forEach(cb => { cb.checked = selectAll; });
+      }
+      updateDashCatButtonLabel(dim);
+      renderDashboard();
+    }
+
+    function updateDashCatButtonLabel(dim = "cat1") {
+      const isAlt = dim === "cat2";
+      const labelEl = document.getElementById(isAlt ? "dash-cat2-label" : "dash-cat1-label");
+      const targetSet = isAlt ? excludedDashAltCategories : excludedDashCategories;
+      const allLabel = isAlt ? "All Alt Categories" : "All Categories";
+      const noneLabel = isAlt ? "No Alt Categories" : "No Categories";
+      const multiLabel = isAlt ? "Alt Categories" : "Categories";
+      if (!labelEl) return;
+
+      const allCats = getSortedCategories();
+      const selectedCount = allCats.filter(c => !targetSet.has(c)).length;
+      if (targetSet.size === 0 || selectedCount === allCats.length) {
+        labelEl.textContent = allLabel;
+      } else if (selectedCount === 0) {
+        labelEl.textContent = noneLabel;
+      } else if (selectedCount === 1) {
+        const only = allCats.find(c => !targetSet.has(c));
+        labelEl.textContent = only || `1 ${multiLabel}`;
+      } else {
+        labelEl.textContent = `${selectedCount} of ${allCats.length} ${multiLabel}`;
+      }
+    }
+
     function getFilteredDashboardRecords() {
       const yFilter = document.getElementById("dash-year")?.value || "ALL";
       const mFilter = document.getElementById("dash-month")?.value || "ALL";
-      const c1Filter = document.getElementById("dash-cat1")?.value || "ALL";
-      const c2Filter = document.getElementById("dash-cat2")?.value || "ALL";
       const tagFilter = document.getElementById("dash-tag")?.value || "ALL";
       const asOfToday = document.getElementById("dash-as-of-today")?.checked ?? true;
       const todayISO = getTodayISO();
@@ -2544,8 +2561,10 @@
         const effMonth = r.expenseMonth || r.budgetMonth || r.incomeMonth || r.investmentMonth;
         if (yFilter !== "ALL" && effYear !== yFilter) return false;
         if (mFilter !== "ALL" && effMonth !== mFilter) return false;
-        if (c1Filter !== "ALL" && r.cat1 !== c1Filter) return false;
-        if (c2Filter !== "ALL" && (r.cat2 || r.cat1) !== c2Filter) return false;
+        const rowCat1 = r.cat1 || "Uncategorized";
+        if (excludedDashCategories.has(rowCat1)) return false;
+        const rowCat2 = (r.cat2 || r.cat1) || "Uncategorized";
+        if (excludedDashAltCategories.has(rowCat2)) return false;
         if (tagFilter !== "ALL" && !extractTagsFromRemarks(r.remarks).includes(tagFilter)) return false;
         return true;
       });
@@ -2554,8 +2573,11 @@
     function resetDashboardFilters() {
       document.getElementById("dash-year").value = "ALL";
       document.getElementById("dash-month").value = "ALL";
-      document.getElementById("dash-cat1").value = "ALL";
-      document.getElementById("dash-cat2").value = "ALL";
+      excludedDashCategories.clear();
+      excludedDashAltCategories.clear();
+      document.querySelectorAll(".dash-cat1-chk, .dash-cat2-chk").forEach(cb => { cb.checked = true; });
+      updateDashCatButtonLabel("cat1");
+      updateDashCatButtonLabel("cat2");
       document.getElementById("dash-tag").value = "ALL";
       const asOfEl = document.getElementById("dash-as-of-today");
       if (asOfEl) asOfEl.checked = true;
@@ -2570,17 +2592,13 @@
     function renderDashboard() {
       const yFilter = document.getElementById("dash-year")?.value || "ALL";
       const mFilter = document.getElementById("dash-month")?.value || "ALL";
-      const c1Filter = document.getElementById("dash-cat1")?.value || "ALL";
-      const c2Filter = document.getElementById("dash-cat2")?.value || "ALL";
       const tagFilter = document.getElementById("dash-tag")?.value || "ALL";
       const asOfToday = document.getElementById("dash-as-of-today")?.checked ?? true;
       const yoyEnabled = document.getElementById("dash-yoy-toggle")?.checked || false;
 
-      const hasFilter = yFilter !== "ALL" || mFilter !== "ALL" || c1Filter !== "ALL" || c2Filter !== "ALL" || tagFilter !== "ALL" || !asOfToday;
+      const hasFilter = yFilter !== "ALL" || mFilter !== "ALL" || excludedDashCategories.size > 0 || excludedDashAltCategories.size > 0 || tagFilter !== "ALL" || !asOfToday;
       const resetDesk = document.getElementById("btn-dash-reset");
-      const resetMob = document.getElementById("btn-dash-reset-mobile");
       if (resetDesk) resetDesk.classList.toggle("hidden", !hasFilter);
-      if (resetMob) resetMob.classList.toggle("hidden", !hasFilter);
 
       const filtered = getFilteredDashboardRecords();
       const todayISO = getTodayISO();
@@ -3383,8 +3401,39 @@
       };
 
       fillSelect("dash-year", sortedYears, "All Years");
-      fillSelect("dash-cat1", sortedCats1, "All Categories");
-      fillSelect("dash-cat2", sortedCats2, "All Alt Categories");
+
+      // Populate multi-select Category checkboxes (all ticked by default)
+      const dashCatOptsEl = document.getElementById("dash-cat1-options");
+      if (dashCatOptsEl) {
+        dashCatOptsEl.innerHTML = sortedCats1.map(cat => {
+          const isChecked = !excludedDashCategories.has(cat);
+          return `
+            <label class="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
+              <input type="checkbox" class="dash-cat1-chk rounded text-indigo-600 w-3.5 h-3.5" ${isChecked ? "checked" : ""}
+                onchange="toggleDashCategory('cat1', '${escapeAttr(cat)}', this.checked)" />
+              <span class="truncate">${escapeHtml(cat)}</span>
+            </label>
+          `;
+        }).join("");
+        updateDashCatButtonLabel("cat1");
+      }
+
+      // Populate multi-select Alt Category checkboxes (all ticked by default)
+      const dashAltCatOptsEl = document.getElementById("dash-cat2-options");
+      if (dashAltCatOptsEl) {
+        dashAltCatOptsEl.innerHTML = sortedCats2.map(cat => {
+          const isChecked = !excludedDashAltCategories.has(cat);
+          return `
+            <label class="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
+              <input type="checkbox" class="dash-cat2-chk rounded text-indigo-600 w-3.5 h-3.5" ${isChecked ? "checked" : ""}
+                onchange="toggleDashCategory('cat2', '${escapeAttr(cat)}', this.checked)" />
+              <span class="truncate">${escapeHtml(cat)}</span>
+            </label>
+          `;
+        }).join("");
+        updateDashCatButtonLabel("cat2");
+      }
+
       fillSelect("dash-tag", sortedTags, "All Tags");
 
       fillSelect("filter-year", sortedYears, "All Years");
@@ -3401,35 +3450,33 @@
     /* ===================================================================== */
     function updateNotificationBadges() {
       const pending = records.filter(r => r.payment === "Pending");
+      const overdue = records.filter(r => isRecordOverdue(r));
       const badge = document.getElementById("notif-badge");
       const pill = document.getElementById("subtab-pending-pill");
       if (badge) {
-        badge.textContent = pending.length;
-        badge.classList.toggle("hidden", pending.length === 0);
+        badge.textContent = overdue.length;
+        badge.classList.toggle("hidden", overdue.length === 0);
       }
       if (pill) pill.textContent = pending.length;
 
       const listEl = document.getElementById("notifications-list");
       if (listEl) {
-        if (pending.length === 0) {
-          listEl.innerHTML = `<div class="py-12 text-center text-xs text-slate-400">No pending or overdue payments.</div>`;
+        if (overdue.length === 0) {
+          listEl.innerHTML = `<div class="py-12 text-center text-xs text-slate-400">No overdue payments.</div>`;
         } else {
-          const sorted = [...pending].sort((a, b) => (a.budgetedDate || "").localeCompare(b.budgetedDate || ""));
-          listEl.innerHTML = sorted.slice(0, 50).map(r => {
-            const ov = isRecordOverdue(r);
-            return `
-              <div class="p-3 rounded-2xl border ${ov ? "border-rose-200 bg-rose-50/70 dark:border-rose-900 dark:bg-rose-950/30" : "border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50"} flex items-center justify-between gap-2">
-                <div class="min-w-0">
-                  <div class="text-xs font-extrabold text-slate-900 dark:text-white truncate">${escapeHtml(r.task)}</div>
-                  <div class="text-[11px] text-slate-500 mt-0.5">${escapeHtml(r.budgetedDate || "—")} • ${formatMoney(r.budgetAmount)}</div>
-                </div>
-                <button type="button" onclick="toggleNotificationsDrawer(); openActualizeModal('${r.id}')"
-                  class="px-2.5 py-1.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[11px] font-bold shrink-0 cursor-pointer">
-                  Settle
-                </button>
+          const sorted = [...overdue].sort((a, b) => (a.budgetedDate || "").localeCompare(b.budgetedDate || ""));
+          listEl.innerHTML = sorted.slice(0, 50).map(r => `
+            <div class="p-3 rounded-2xl border border-rose-200 bg-rose-50/70 dark:border-rose-900 dark:bg-rose-950/30 flex items-center justify-between gap-2">
+              <div class="min-w-0">
+                <div class="text-xs font-extrabold text-slate-900 dark:text-white truncate">${escapeHtml(r.task)}</div>
+                <div class="text-[11px] text-rose-700 dark:text-rose-300 mt-0.5">Overdue • ${escapeHtml(r.budgetedDate || "—")} • ${formatMoney(r.budgetAmount)}</div>
               </div>
-            `;
-          }).join("");
+              <button type="button" onclick="toggleNotificationsDrawer(); openActualizeModal('${r.id}')"
+                class="px-2.5 py-1.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[11px] font-bold shrink-0 cursor-pointer">
+                Settle
+              </button>
+            </div>
+          `).join("");
         }
       }
     }
