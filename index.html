@@ -1,0 +1,3355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>ORO — The Money Tracker</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS with Class-Based Dark Mode -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Lucide Icons & Chart.js -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Dynamic PWA Manifest -->
+  <link rel="manifest" id="pwa-manifest" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <style>
+    html, body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+    }
+
+    /* Hide number spinners */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .dark ::-webkit-scrollbar-thumb {
+      background: #334155;
+    }
+
+    /* Page View Transitions */
+    .page-view {
+      display: none;
+      animation: fadeSlideIn 0.2s ease-out;
+    }
+    .page-view.active {
+      display: block;
+    }
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Entry Sub-Tab Transitions */
+    .entry-subtab {
+      display: none;
+      animation: fadeSlideIn 0.16s ease-out;
+    }
+    .entry-subtab.active {
+      display: block;
+    }
+
+    /* Sticky Column in 27-Col Ledger */
+    .sticky-col-task {
+      position: sticky;
+      left: 0;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
+
+  <!-- Minimal Top Header Bar (Compact + Auto-Hide on Mobile Scroll) -->
+  <header id="main-header" class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 transition-transform duration-200">
+    <div class="max-w-7xl mx-auto px-3.5 sm:px-6 h-11 sm:h-14 flex items-center justify-between gap-3">
+
+      <!-- Left: Mobile 3-Bar Menu Button + Minimal Single-Color ORO Logo + Subtitle -->
+      <div class="flex items-center gap-2 sm:gap-2.5 min-w-0">
+        <button type="button" onclick="toggleMobileMenu()" aria-label="Open Menu"
+          class="md:hidden w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center transition-colors cursor-pointer shrink-0">
+          <i data-lucide="menu" class="w-4 h-4"></i>
+        </button>
+
+        <button type="button" onclick="navigateTo('home')" class="flex items-center gap-2 text-left group cursor-pointer focus:outline-none min-w-0">
+          <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-slate-900 dark:bg-white flex items-center justify-center transition-transform group-hover:scale-105 shrink-0">
+            <span class="font-black text-[11px] sm:text-xs tracking-tighter text-white dark:text-slate-900">ORO</span>
+          </div>
+          <span class="font-semibold text-xs sm:text-sm tracking-tight text-slate-600 dark:text-slate-300 truncate">The Money Tracker</span>
+        </button>
+      </div>
+
+      <!-- Center: Spacious Desktop Navigation Pills -->
+      <nav class="hidden md:flex items-center gap-1.5 bg-slate-100/90 dark:bg-slate-800/80 p-1 rounded-2xl">
+        <button type="button" onclick="navigateTo('entry')" id="nav-entry" class="nav-pill px-4 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-2">
+          <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Entry
+        </button>
+        <button type="button" onclick="navigateTo('dashboard')" id="nav-dashboard" class="nav-pill px-4 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-2">
+          <i data-lucide="bar-chart-3" class="w-3.5 h-3.5"></i> Dashboard
+        </button>
+        <button type="button" onclick="navigateTo('ledger')" id="nav-ledger" class="nav-pill px-4 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-2">
+          <i data-lucide="table-2" class="w-3.5 h-3.5"></i> Ledger
+        </button>
+        <button type="button" onclick="navigateTo('master')" id="nav-master" class="nav-pill px-4 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-2">
+          <i data-lucide="database" class="w-3.5 h-3.5"></i> Master
+        </button>
+        <button type="button" onclick="navigateTo('settings')" id="nav-settings" class="nav-pill px-4 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-2">
+          <i data-lucide="settings" class="w-3.5 h-3.5"></i> Settings
+        </button>
+      </nav>
+
+      <!-- Right: Minimal Utility Icons (Alerts & Theme Toggle) -->
+      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <button type="button" onclick="toggleNotificationsDrawer()" id="btn-notif" title="Alerts"
+          class="relative w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors cursor-pointer">
+          <i data-lucide="bell" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+          <span id="notif-badge" class="hidden absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 rounded-full bg-rose-500 text-white text-[9px] font-extrabold flex items-center justify-center shadow-xs">0</span>
+        </button>
+
+        <button type="button" onclick="toggleTheme()" id="btn-theme-toggle" title="Theme"
+          class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors cursor-pointer">
+          <i data-lucide="moon" id="theme-icon-moon" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+          <i data-lucide="sun" id="theme-icon-sun" class="w-3.5 h-3.5 sm:w-4 sm:h-4 hidden text-amber-400"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 py-3 sm:py-6">
+
+    <!-- =================================================================== -->
+    <!-- VIEW 1: RECORD ENTRY                                                -->
+    <!-- =================================================================== -->
+    <section id="page-entry" class="page-view space-y-4">
+
+      <!-- Clean Sub-Tab Bar -->
+      <div class="bg-white dark:bg-slate-900 rounded-2xl p-1.5 border border-slate-200 dark:border-slate-800 shadow-2xs grid grid-cols-3 gap-1.5">
+        <button type="button" onclick="switchEntryTab('actual')" id="subtab-btn-actual"
+          class="subtab-btn py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer bg-slate-900 dark:bg-emerald-600 text-white shadow-xs">
+          <i data-lucide="receipt" class="w-4 h-4"></i>
+          <span>Actual</span>
+        </button>
+        <button type="button" onclick="switchEntryTab('budgets')" id="subtab-btn-budgets"
+          class="subtab-btn py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <i data-lucide="calendar-check" class="w-4 h-4"></i>
+          <span>Budgets</span>
+          <span id="subtab-pending-pill" class="px-1.5 py-0.5 text-[10px] font-extrabold rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300">0</span>
+        </button>
+        <button type="button" onclick="switchEntryTab('plan')" id="subtab-btn-plan"
+          class="subtab-btn py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <i data-lucide="repeat" class="w-4 h-4"></i>
+          <span>Schedule</span>
+        </button>
+      </div>
+
+      <!-- SUB-TAB A: ACTUAL ENTRY -->
+      <div id="entry-subtab-actual" class="entry-subtab active">
+        <div class="max-w-2xl mx-auto bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+          <div class="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <h1 class="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">Actual Entry</h1>
+            <button type="button" onclick="resetQuickActualForm()" class="text-xs font-semibold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white cursor-pointer">
+              Clear
+            </button>
+          </div>
+
+          <form id="quick-actual-form" onsubmit="handleQuickActualSubmit(event)" class="p-5 sm:p-6 space-y-5">
+            <!-- Date & Amount -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Date *</label>
+                <input type="date" id="qa-actual-date" required
+                  class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-3 text-sm font-semibold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all" />
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400">Amount</label>
+                  <span id="calc-preview-qa-actual-amount" class="hidden text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/80 px-2 py-0.5 rounded-full"></span>
+                </div>
+                <input type="text" id="qa-actual-amount" inputmode="decimal"
+                  oninput="previewMathInput(this)" onblur="commitMathInput(this)" onkeydown="handleMathKeydown(event, this)"
+                  class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-3 text-lg font-extrabold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all tabular-nums" />
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Description *</label>
+              <input type="text" id="qa-task" list="task-suggestions-list" required autocomplete="off"
+                oninput="handleTaskAutoMatch(this.value)" onchange="handleTaskAutoMatch(this.value)"
+                class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-sm font-semibold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all" />
+              <datalist id="task-suggestions-list"></datalist>
+            </div>
+
+            <!-- Category & Alt Category -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Category *</label>
+                <div class="relative">
+                  <input type="text" id="qa-cat1" required autocomplete="off"
+                    onfocus="openCategoryDropdown('qa-cat1')"
+                    oninput="filterCategoryDropdown('qa-cat1'); mirrorCategoryToAlt('qa-cat1', 'qa-cat2')"
+                    onkeydown="handleCategoryKeydown(event, 'qa-cat1', 'qa-cat2')"
+                    class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 pl-3.5 pr-9 py-3 text-sm font-semibold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-emerald-500 outline-none" />
+                  <button type="button" tabindex="-1" onclick="toggleCategoryDropdown('qa-cat1')"
+                    class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer">
+                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                  </button>
+                  <div id="qa-cat1-dropdown" class="cat-combo-menu hidden absolute z-30 left-0 right-0 mt-1 max-h-48 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg py-1"></div>
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Alt Category</label>
+                <div class="relative">
+                  <input type="text" id="qa-cat2" autocomplete="off"
+                    onfocus="openCategoryDropdown('qa-cat2')"
+                    oninput="this.dataset.customized = 'true'; filterCategoryDropdown('qa-cat2')"
+                    onkeydown="handleCategoryKeydown(event, 'qa-cat2')"
+                    class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 pl-3.5 pr-9 py-3 text-sm font-semibold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-emerald-500 outline-none" />
+                  <button type="button" tabindex="-1" onclick="toggleCategoryDropdown('qa-cat2')"
+                    class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer">
+                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                  </button>
+                  <div id="qa-cat2-dropdown" class="cat-combo-menu hidden absolute z-30 left-0 right-0 mt-1 max-h-48 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg py-1"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Remarks + Tag Toggle -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400">Remarks</label>
+                <button type="button" onclick="toggleEventTagPanel()" id="btn-event-tag-toggle"
+                  class="text-[11px] font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1 cursor-pointer">
+                  <i data-lucide="hash" class="w-3 h-3"></i>
+                  <span id="event-tag-btn-label">Tag</span>
+                </button>
+              </div>
+
+              <!-- Optional Event / Trip Tag Banner -->
+              <div id="event-tag-panel" class="hidden mb-2 p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-600 dark:text-slate-300 pl-1">#</span>
+                <input type="text" id="active-event-tag-input" oninput="saveActiveEventTag(this.value)"
+                  class="flex-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-300 dark:border-slate-700 px-2.5 py-1.5 text-xs font-semibold text-slate-900 dark:text-white outline-none" />
+                <button type="button" onclick="clearActiveEventTag()" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer">
+                  Off
+                </button>
+              </div>
+
+              <input type="text" id="qa-remarks"
+                class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-sm text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-emerald-500 outline-none" />
+            </div>
+
+            <!-- Collapsible Income, Investment & FX Drawer -->
+            <div class="pt-1">
+              <button type="button" onclick="toggleExtraActualFields()" id="btn-toggle-extra-actual"
+                class="w-full py-2.5 px-4 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition-colors cursor-pointer">
+                <span class="flex items-center gap-2">
+                  <i data-lucide="plus" class="w-3.5 h-3.5 text-emerald-600"></i>
+                  <span>Income, Investment & FX</span>
+                </span>
+                <i data-lucide="chevron-down" id="extra-actual-chevron" class="w-4 h-4 transition-transform"></i>
+              </button>
+
+              <div id="extra-actual-drawer" class="hidden mt-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 grid grid-cols-2 gap-3.5">
+                <div>
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="text-[11px] font-bold text-sky-700 dark:text-sky-400">Income</label>
+                    <span id="calc-preview-qa-income" class="hidden text-[10px] font-bold text-sky-700 dark:text-sky-300"></span>
+                  </div>
+                  <input type="text" id="qa-income" inputmode="decimal"
+                    oninput="previewMathInput(this)" onblur="commitMathInput(this)" onkeydown="handleMathKeydown(event, this)"
+                    class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-bold text-slate-900 dark:text-white outline-none tabular-nums" />
+                </div>
+
+                <div>
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="text-[11px] font-bold text-emerald-700 dark:text-emerald-400">Investment</label>
+                    <span id="calc-preview-qa-investment" class="hidden text-[10px] font-bold text-emerald-700 dark:text-emerald-300"></span>
+                  </div>
+                  <input type="text" id="qa-investment" inputmode="decimal"
+                    oninput="previewMathInput(this)" onblur="commitMathInput(this)" onkeydown="handleMathKeydown(event, this)"
+                    class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-bold text-slate-900 dark:text-white outline-none tabular-nums" />
+                </div>
+
+                <div>
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="text-[11px] font-bold text-slate-600 dark:text-slate-400">USD</label>
+                    <span id="calc-preview-qa-usd" class="hidden text-[10px] font-bold text-slate-600 dark:text-slate-300"></span>
+                  </div>
+                  <input type="text" id="qa-usd" inputmode="decimal"
+                    oninput="previewMathInput(this)" onblur="commitMathInput(this)" onkeydown="handleMathKeydown(event, this)"
+                    class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-bold text-slate-900 dark:text-white outline-none tabular-nums" />
+                </div>
+
+                <div>
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="text-[11px] font-bold text-slate-600 dark:text-slate-400">GBP</label>
+                    <span id="calc-preview-qa-gbp" class="hidden text-[10px] font-bold text-slate-600 dark:text-slate-300"></span>
+                  </div>
+                  <input type="text" id="qa-gbp" inputmode="decimal"
+                    oninput="previewMathInput(this)" onblur="commitMathInput(this)" onkeydown="handleMathKeydown(event, this)"
+                    class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-bold text-slate-900 dark:text-white outline-none tabular-nums" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Save CTA -->
+            <button type="submit"
+              class="w-full py-3.5 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white text-sm font-extrabold shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+              <span>Save</span>
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- SUB-TAB B: BUDGETS -->
+      <div id="entry-subtab-budgets" class="entry-subtab space-y-4">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-2xs space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <h2 class="text-base font-extrabold text-slate-900 dark:text-white">Budgets</h2>
+
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="shiftEntryMonth(-1)" title="Previous"
+                class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer">
+                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+              </button>
+              <select id="entry-filter-month" onchange="renderEntryBudgetList()"
+                class="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
+                <option value="ALL">All Months</option>
+                <option value="Jan">Jan</option><option value="Feb">Feb</option><option value="Mar">Mar</option>
+                <option value="Apr">Apr</option><option value="May">May</option><option value="Jun">Jun</option>
+                <option value="Jul">Jul</option><option value="Aug">Aug</option><option value="Sep">Sep</option>
+                <option value="Oct">Oct</option><option value="Nov">Nov</option><option value="Dec">Dec</option>
+              </select>
+              <select id="entry-filter-year" onchange="renderEntryBudgetList()"
+                class="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
+              </select>
+              <button type="button" onclick="shiftEntryMonth(1)" title="Next"
+                class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer">
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Status Filter Pills & Month Summary -->
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <div class="flex flex-wrap gap-1.5">
+              <button type="button" onclick="setEntryStatusFilter('ALL')" id="eb-filter-ALL"
+                class="eb-filter-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 dark:bg-white text-white dark:text-slate-900 cursor-pointer">
+                All
+              </button>
+              <button type="button" onclick="setEntryStatusFilter('Pending')" id="eb-filter-Pending"
+                class="eb-filter-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer">
+                Pending
+              </button>
+              <button type="button" onclick="setEntryStatusFilter('Overdue')" id="eb-filter-Overdue"
+                class="eb-filter-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer">
+                Overdue
+              </button>
+              <button type="button" onclick="setEntryStatusFilter('Paid')" id="eb-filter-Paid"
+                class="eb-filter-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer">
+                Paid
+              </button>
+            </div>
+
+            <div class="text-xs font-semibold text-slate-600 dark:text-slate-400">
+              Budget: <strong id="eb-summary-budget" class="text-slate-900 dark:text-white">0.00</strong>
+              <span class="mx-1.5">•</span>
+              Paid: <strong id="eb-summary-actual" class="text-emerald-600 dark:text-emerald-400">0.00</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Budget Items List -->
+        <div id="entry-budget-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+      </div>
+
+      <!-- SUB-TAB C: SCHEDULE -->
+      <div id="entry-subtab-plan" class="entry-subtab">
+        <div class="max-w-2xl mx-auto bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+          <div class="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <h2 class="text-base font-extrabold text-slate-900 dark:text-white">Schedule</h2>
+            <button type="button" onclick="resetPlanBudgetForm()" class="text-xs font-semibold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white cursor-pointer">
+              Clear
+            </button>
+          </div>
+
+          <form id="plan-budget-form" onsubmit="handlePlanBudgetSubmit(event)" class="p-5 sm:p-6 space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Description *</label>
+              <input type="text" id="pb-task" list="task-suggestions-list" required autocomplete="off"
+                oninput="handlePlanTaskAutoMatch(this.value)" onchange="handlePlanTaskAutoMatch(this.value)"
+                class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-sm font-semibold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 outline-none" />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Category *</label>
+                <div class="relative">
+                  <input type="text" id="pb-cat1" required autocomplete="off"
+                    onfocus="openCategoryDropdown('pb-cat1')"
+                    oninput="filterCategoryDropdown('pb-cat1'); mirrorCategoryToAlt('pb-cat1', 'pb-cat2')"
+                    onkeydown="handleCategoryKeydown(event, 'pb-cat1', 'pb-cat2')"
+                    class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 pl-3.5 pr-9 py-3 text-sm font-semibold text-slate-900 dark:text-white outline-none" />
+                  <button type="button" tabindex="-1" onclick="toggleCategoryDropdown('pb-cat1')"
+                    class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer">
+                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                  </button>
+                  <div id="pb-cat1-dropdown" class="cat-combo-menu hidden absolute z-30 left-0 right-0 mt-1 max-h-48 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg py-1"></div>
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Alt Category</label>
+                <div class="relative">
+                  <input type="text" id="pb-cat2" autocomplete="off"
+                    onfocus="openCategoryDropdown('pb-cat2')"
+                    oninput="this.dataset.customized = 'true'; filterCategoryDropdown('pb-cat2')"
+                    onkeydown="handleCategoryKeydown(event, 'pb-cat2')"
+                    class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 pl-3.5 pr-9 py-3 text-sm font-semibold text-slate-900 dark:text-white outline-none" />
+                  <button type="button" tabindex="-1" onclick="toggleCategoryDropdown('pb-cat2')"
+                    class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer">
+                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                  </button>
+                  <div id="pb-cat2-dropdown" class="cat-combo-menu hidden absolute z-30 left-0 right-0 mt-1 max-h-48 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg py-1"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Date *</label>
+                <input type="date" id="pb-budget-date" required onchange="syncPlanFromDate()"
+                  class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-3 text-sm font-semibold text-slate-900 dark:text-white outline-none" />
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400">Amount *</label>
+                  <span id="calc-preview-pb-budget-amount" class="hidden text-[11px] font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950 px-2 py-0.5 rounded-full"></span>
+                </div>
+                <input type="text" id="pb-budget-amount" required inputmode="decimal"
+                  oninput="previewMathInput(this)" onblur="commitMathInput(this)" onkeydown="handleMathKeydown(event, this)"
+                  class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-3 text-base font-extrabold text-slate-900 dark:text-white outline-none tabular-nums" />
+              </div>
+            </div>
+
+            <!-- Recurring Section -->
+            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Recurring</label>
+                  <select id="pb-recurring" onchange="togglePlanRecurringFields()"
+                    class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm font-semibold text-slate-900 dark:text-white outline-none">
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Frequency</label>
+                  <select id="pb-frequency"
+                    class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm font-semibold text-slate-900 dark:text-white outline-none">
+                  </select>
+                </div>
+              </div>
+
+              <div id="plan-recurring-dates" class="hidden grid grid-cols-2 gap-3 pt-1">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">From</label>
+                  <input type="date" id="pb-from-date"
+                    class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-semibold text-slate-900 dark:text-white outline-none" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">To</label>
+                  <input type="date" id="pb-to-date"
+                    class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-semibold text-slate-900 dark:text-white outline-none" />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Remarks</label>
+              <input type="text" id="pb-remarks"
+                class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-2.5 text-sm text-slate-900 dark:text-white outline-none" />
+            </div>
+
+            <button type="submit"
+              class="w-full py-3.5 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-extrabold shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer">
+              <i data-lucide="calendar-plus" class="w-4 h-4"></i>
+              <span>Save</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- VIEW 2: DASHBOARD                                                   -->
+    <!-- =================================================================== -->
+    <section id="page-dashboard" class="page-view space-y-5">
+      <!-- Top Filter Slicers -->
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-3">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          <div class="flex items-center justify-between">
+            <h1 class="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">Dashboard</h1>
+            <button type="button" onclick="resetDashboardFilters()" id="btn-dash-reset-mobile"
+              class="sm:hidden hidden px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer">
+              Reset
+            </button>
+          </div>
+
+          <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full lg:w-auto">
+            <select id="dash-year" onchange="renderDashboard()"
+              class="w-full sm:w-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
+              <option value="ALL">All Years</option>
+            </select>
+
+            <select id="dash-month" onchange="renderDashboard()"
+              class="w-full sm:w-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
+              <option value="ALL">All Months</option>
+              <option value="Jan">Jan</option><option value="Feb">Feb</option><option value="Mar">Mar</option>
+              <option value="Apr">Apr</option><option value="May">May</option><option value="Jun">Jun</option>
+              <option value="Jul">Jul</option><option value="Aug">Aug</option><option value="Sep">Sep</option>
+              <option value="Oct">Oct</option><option value="Nov">Nov</option><option value="Dec">Dec</option>
+            </select>
+
+            <select id="dash-cat1" onchange="renderDashboard()"
+              class="w-full sm:w-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
+              <option value="ALL">All Categories</option>
+            </select>
+
+            <select id="dash-cat2" onchange="renderDashboard()"
+              class="w-full sm:w-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
+              <option value="ALL">All Alt Categories</option>
+            </select>
+
+            <select id="dash-tag" onchange="renderDashboard()"
+              class="col-span-2 sm:col-span-1 w-full sm:w-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
+              <option value="ALL">All Tags</option>
+            </select>
+
+            <button type="button" onclick="resetDashboardFilters()" id="btn-dash-reset"
+              class="hidden px-3 py-2 rounded-xl text-xs font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 cursor-pointer">
+              Reset
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <!-- Clickable Pending & Overdue Card -->
+        <button type="button" onclick="openPendingBudgetsFromDashboard()"
+          class="text-left bg-amber-50/90 dark:bg-amber-950/40 hover:border-amber-500 rounded-2xl p-4 border-2 border-amber-200 dark:border-amber-800/70 shadow-2xs transition-all cursor-pointer group">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">Pending</span>
+            <i data-lucide="arrow-up-right" class="w-4 h-4 text-amber-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+          </div>
+          <div class="flex items-baseline gap-2 mt-1">
+            <span id="d-kpi-pending-count" class="text-xl font-extrabold text-amber-900 dark:text-amber-200">0</span>
+            <span id="d-kpi-overdue-badge" class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-rose-600 text-white">0 overdue</span>
+          </div>
+          <div class="text-[11px] font-semibold text-amber-700 dark:text-amber-400 mt-1">Open</div>
+        </button>
+
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-2xs">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Budgeted</div>
+          <div id="d-kpi-budget" class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white mt-1 tabular-nums">0.00</div>
+          <div id="d-kpi-budget-sub" class="text-[11px] text-slate-500 mt-1">0 items</div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-2xs">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Spent</div>
+          <div id="d-kpi-actual" class="text-lg sm:text-xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-1 tabular-nums">0.00</div>
+          <div id="d-kpi-actual-sub" class="text-[11px] text-slate-500 mt-1">0% of budget</div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-2xs">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Balance</div>
+          <div id="d-kpi-balance" class="text-lg sm:text-xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1 tabular-nums">0.00</div>
+          <div id="d-kpi-balance-sub" class="text-[11px] text-slate-500 mt-1">Remaining</div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-2xs">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">Income</div>
+          <div id="d-kpi-income" class="text-lg sm:text-xl font-extrabold text-sky-700 dark:text-sky-300 mt-1 tabular-nums">0.00</div>
+          <div id="d-kpi-invest" class="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1">Invested: 0.00</div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-2xs">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Compliance</div>
+          <div id="d-kpi-compliance" class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white mt-1 tabular-nums">100%</div>
+          <div id="d-kpi-nonbudget" class="text-[11px] text-rose-500 font-semibold mt-1">0 unbudgeted</div>
+        </div>
+      </div>
+
+      <!-- Charts Row 1: Trend Line Chart (with YoY Toggle) + Category Pie Chart -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <div class="lg:col-span-7 bg-white dark:bg-slate-900 rounded-3xl p-3.5 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-2xs flex flex-col">
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <h2 id="trend-chart-title" class="text-sm font-extrabold text-slate-900 dark:text-white">Trend</h2>
+
+            <!-- Year-on-Year Comparison Toggle -->
+            <label class="inline-flex items-center gap-1.5 cursor-pointer bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700">
+              <input type="checkbox" id="dash-yoy-toggle" onchange="renderDashboard()" class="w-3 h-3 rounded text-indigo-600 focus:ring-0 cursor-pointer" />
+              <span class="text-[11px] font-bold text-slate-700 dark:text-slate-200">YoY</span>
+            </label>
+          </div>
+          <div class="relative flex-1 min-h-[275px] sm:min-h-[290px]">
+            <canvas id="chart-trend"></canvas>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 bg-white dark:bg-slate-900 rounded-3xl p-3.5 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-2xs flex flex-col">
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <h2 class="text-sm font-extrabold text-slate-900 dark:text-white">Share</h2>
+            <select id="dash-pie-dimension" onchange="renderDashboard()"
+              class="rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-2 py-1 text-[11px] font-bold text-slate-700 dark:text-slate-200 outline-none">
+              <option value="cat1">Category</option>
+              <option value="cat2">Alt Category</option>
+            </select>
+          </div>
+          <div class="relative flex-1 min-h-[260px]">
+            <canvas id="chart-pie"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category Summary Pivot Table -->
+      <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xs overflow-hidden">
+        <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <h2 class="text-sm font-extrabold text-slate-900 dark:text-white">Summary</h2>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <select id="dash-pivot-dimension" onchange="renderDashboard()"
+              class="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-800 dark:text-slate-200 outline-none">
+              <option value="cat1">Category</option>
+              <option value="cat2">Alt Category</option>
+            </select>
+
+            <label class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl cursor-pointer">
+              <input type="checkbox" id="dash-pivot-hide-zero" checked onchange="renderDashboard()" class="rounded text-indigo-600 cursor-pointer" />
+              <span>Hide Zero</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+                <th class="py-3 px-4">Category</th>
+                <th class="py-3 px-4 text-right">Budgeted</th>
+                <th class="py-3 px-4 text-right">Spent</th>
+                <th class="py-3 px-4 text-right">Balance</th>
+                <th class="py-3 px-4 text-right">Income</th>
+                <th class="py-3 px-4 text-right">Invested</th>
+                <th class="py-3 px-4 text-right">Share</th>
+                <th class="py-3 px-4 text-center">Items</th>
+              </tr>
+            </thead>
+            <tbody id="dash-pivot-tbody" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+            <tfoot id="dash-pivot-tfoot" class="bg-slate-100/80 dark:bg-slate-800/90 font-extrabold text-slate-900 dark:text-white border-t-2 border-slate-200 dark:border-slate-700"></tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Charts Row 2: Budget vs Actual Bar Chart -->
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-3.5 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-2xs">
+        <div class="flex items-center justify-between gap-2 mb-1.5">
+          <h2 class="text-sm font-extrabold text-slate-900 dark:text-white">Budget vs Spent</h2>
+        </div>
+        <div class="relative h-[260px]">
+          <canvas id="chart-bar"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- VIEW 3: LEDGER                                                      -->
+    <!-- =================================================================== -->
+    <section id="page-ledger" class="page-view space-y-4">
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <h1 class="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">Ledger</h1>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="runRecurringMacro()"
+              class="px-3.5 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 dark:bg-amber-950 dark:hover:bg-amber-900 text-amber-900 dark:text-amber-300 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer">
+              <i data-lucide="play" class="w-3.5 h-3.5"></i> Run Recurring
+            </button>
+            <button type="button" onclick="exportToExcelCSV()"
+              class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i> Export CSV
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-6 gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800">
+          <select id="filter-year" onchange="applyLedgerFilters()" class="rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white outline-none">
+            <option value="ALL">All Years</option>
+          </select>
+          <select id="filter-month" onchange="applyLedgerFilters()" class="rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white outline-none">
+            <option value="ALL">All Months</option>
+            <option value="Jan">Jan</option><option value="Feb">Feb</option><option value="Mar">Mar</option>
+            <option value="Apr">Apr</option><option value="May">May</option><option value="Jun">Jun</option>
+            <option value="Jul">Jul</option><option value="Aug">Aug</option><option value="Sep">Sep</option>
+            <option value="Oct">Oct</option><option value="Nov">Nov</option><option value="Dec">Dec</option>
+          </select>
+          <select id="filter-category" onchange="applyLedgerFilters()" class="rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white outline-none">
+            <option value="ALL">All Categories</option>
+          </select>
+          <select id="filter-payment" onchange="applyLedgerFilters()" class="rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white outline-none">
+            <option value="ALL">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="Paid">Paid</option>
+          </select>
+          <select id="filter-tag" onchange="applyLedgerFilters()" class="rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white outline-none">
+            <option value="ALL">All Tags</option>
+          </select>
+          <input type="text" id="filter-search" oninput="applyLedgerFilters()"
+            class="rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs text-slate-900 dark:text-white outline-none" />
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xs overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs whitespace-nowrap">
+            <thead>
+              <tr class="font-bold tracking-wider border-b border-slate-200 dark:border-slate-800">
+                <th class="py-3 px-3 bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200">Actual Date</th>
+                <th class="py-3 px-3 bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 sticky-col-task">Task</th>
+                <th class="py-3 px-3 bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200">Category</th>
+                <th class="py-3 px-3 bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200">Category 2</th>
+                <th class="py-3 px-3 bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-right">Actual Amount</th>
+                <th class="py-3 px-3 bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-right">Balance to Pay</th>
+                <th class="py-3 px-3 bg-sky-600 text-white text-right">Income</th>
+                <th class="py-3 px-3 bg-emerald-700 text-white text-right">Investment</th>
+                <th class="py-3 px-3 bg-slate-600 text-white text-right">USD</th>
+                <th class="py-3 px-3 bg-slate-600 text-white text-right">GBP</th>
+                <th class="py-3 px-3 bg-indigo-700 text-white">Budgeted Date</th>
+                <th class="py-3 px-3 bg-indigo-700 text-white text-right">Budget Amount</th>
+                <th class="py-3 px-3 bg-amber-600 text-white">Recurring</th>
+                <th class="py-3 px-3 bg-amber-600 text-white">Frequency</th>
+                <th class="py-3 px-3 bg-amber-600 text-white">From</th>
+                <th class="py-3 px-3 bg-amber-600 text-white">To</th>
+                <th class="py-3 px-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Compliance</th>
+                <th class="py-3 px-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Payment</th>
+                <th class="py-3 px-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Income Year</th>
+                <th class="py-3 px-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Income Month</th>
+                <th class="py-3 px-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Investment Year</th>
+                <th class="py-3 px-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Investment Month</th>
+                <th class="py-3 px-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Budget Year</th>
+                <th class="py-3 px-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Budget Month</th>
+                <th class="py-3 px-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Expense Year</th>
+                <th class="py-3 px-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Expense Month</th>
+                <th class="py-3 px-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Remarks</th>
+                <th class="py-3 px-3 bg-slate-900 text-white text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ledger-tbody" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+          </table>
+        </div>
+        <div id="ledger-empty" class="hidden py-12 text-center text-slate-400 text-sm">No records found.</div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- VIEW 4: MASTER DATA                                                 -->
+    <!-- =================================================================== -->
+    <section id="page-master" class="page-view space-y-5">
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <h1 class="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">Master</h1>
+        <button type="button" onclick="resetMasterDataToDefaults()"
+          class="px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer self-start">
+          Reset Defaults
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-extrabold text-slate-900 dark:text-white">Categories</h2>
+            <span id="master-cat-count" class="text-xs font-bold bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 px-2.5 py-1 rounded-full">0</span>
+          </div>
+          <form onsubmit="addMasterItem(event, 'categories', 'new-cat-input')" class="flex gap-2">
+            <input type="text" id="new-cat-input" required
+              class="flex-1 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-indigo-500" />
+            <button type="submit" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold cursor-pointer">Add</button>
+          </form>
+          <div id="master-categories-list" class="flex flex-wrap gap-2 max-h-[340px] overflow-y-auto p-1"></div>
+        </div>
+
+        <div class="space-y-5">
+          <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-3">
+            <h2 class="text-sm font-extrabold text-slate-900 dark:text-white">Recurring</h2>
+            <form onsubmit="addMasterItem(event, 'recurringOptions', 'new-rec-input')" class="flex gap-2">
+              <input type="text" id="new-rec-input" required
+                class="flex-1 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs text-slate-900 dark:text-white outline-none" />
+              <button type="submit" class="px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold cursor-pointer">Add</button>
+            </form>
+            <div id="master-recurring-list" class="flex flex-wrap gap-2"></div>
+          </div>
+
+          <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-3">
+            <h2 class="text-sm font-extrabold text-slate-900 dark:text-white">Frequency</h2>
+            <form onsubmit="addMasterItem(event, 'frequencies', 'new-freq-input')" class="flex gap-2">
+              <input type="text" id="new-freq-input" required
+                class="flex-1 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs text-slate-900 dark:text-white outline-none" />
+              <button type="submit" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer">Add</button>
+            </form>
+            <div id="master-frequencies-list" class="flex flex-wrap gap-2"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- VIEW 5: SETTINGS                                                    -->
+    <!-- =================================================================== -->
+    <section id="page-settings" class="page-view space-y-5">
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-2xs">
+        <h1 class="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">Settings</h1>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
+          <h2 class="text-sm font-extrabold text-slate-900 dark:text-white">Preferences</h2>
+
+          <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70">
+            <div class="text-xs font-bold text-slate-800 dark:text-slate-200">Dark Mode</div>
+            <button type="button" onclick="toggleTheme()" id="settings-theme-btn"
+              class="px-3.5 py-1.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold cursor-pointer">
+              Toggle
+            </button>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Default Screen</label>
+            <select id="setting-default-landing" onchange="saveSettings()"
+              class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white outline-none">
+              <option value="dashboard">Always Dashboard</option>
+              <option value="adaptive">Adaptive (Mobile: Entry, Desktop: Dashboard)</option>
+              <option value="entry">Always Entry</option>
+              <option value="home">Always Overview</option>
+            </select>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Currency</label>
+            <input type="text" id="setting-currency" onchange="saveSettings()"
+              class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white outline-none" />
+          </div>
+
+          <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70">
+            <div class="text-xs font-bold text-slate-800 dark:text-slate-200">Browser Alerts</div>
+            <button type="button" onclick="requestBrowserNotifications()"
+              class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold cursor-pointer">
+              Enable
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
+          <h2 class="text-sm font-extrabold text-slate-900 dark:text-white">Data</h2>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button type="button" onclick="exportToExcelCSV()"
+              class="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer">
+              <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Export CSV
+            </button>
+
+            <label class="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold cursor-pointer">
+              <i data-lucide="upload" class="w-4 h-4"></i> Import CSV
+              <input type="file" accept=".csv" onchange="importFromExcelCSV(event)" class="hidden" />
+            </label>
+
+            <button type="button" onclick="exportJSONBackup()"
+              class="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold cursor-pointer">
+              <i data-lucide="save" class="w-4 h-4"></i> Backup JSON
+            </button>
+
+            <label class="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-bold cursor-pointer">
+              <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Restore JSON
+              <input type="file" accept=".json" onchange="importJSONBackup(event)" class="hidden" />
+            </label>
+          </div>
+
+          <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <button type="button" onclick="loadSampleDataset()" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer">Load Sample</button>
+            <button type="button" onclick="confirmClearAllData()" class="text-xs font-bold text-rose-600 dark:text-rose-400 hover:underline cursor-pointer">Clear All</button>
+          </div>
+        </div>
+
+        <!-- Cloud Sync (Supabase 1-User Automatic Backup) -->
+        <div class="md:col-span-2 bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <h2 class="text-sm font-extrabold text-slate-900 dark:text-white">Cloud Sync</h2>
+              <span id="cloud-status-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Offline Only</span>
+            </div>
+            <span id="cloud-last-sync" class="text-[11px] font-semibold text-slate-400"></span>
+          </div>
+
+          <div id="cloud-setup-form" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Project URL</label>
+              <input type="url" id="sb-url" placeholder="https://your-id.supabase.co"
+                class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-900 dark:text-white outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Anon / Publishable Key</label>
+              <input type="password" id="sb-key" placeholder="eyJ... or sb_publishable_..."
+                class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-900 dark:text-white outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Email</label>
+              <input type="email" id="sb-email"
+                class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-900 dark:text-white outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Password</label>
+              <input type="password" id="sb-password"
+                class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-900 dark:text-white outline-none" />
+            </div>
+            <div class="sm:col-span-2 flex flex-wrap gap-2 pt-1">
+              <button type="button" onclick="connectAndSignInSupabase()"
+                class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-bold cursor-pointer">
+                Connect & Sign In
+              </button>
+            </div>
+          </div>
+
+          <div id="cloud-connected-bar" class="hidden flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900">
+            <div class="text-xs font-semibold text-emerald-900 dark:text-emerald-200">
+              Signed in as <strong id="cloud-user-email"></strong>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" onclick="syncCloudNow(true)"
+                class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer">
+                Sync Now
+              </button>
+              <button type="button" onclick="signOutSupabase()"
+                class="px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold cursor-pointer">
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- VIEW 6: HOME (ORO OVERVIEW)                                         -->
+    <!-- =================================================================== -->
+    <section id="page-home" class="page-view space-y-5">
+      <div class="bg-slate-900 text-white rounded-3xl p-5 sm:p-8 shadow-lg">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+          <div class="space-y-1.5">
+            <div class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400">
+              <span>ORO</span>
+              <span class="text-slate-500">•</span>
+              <span class="text-slate-300">The Money Tracker</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Personal Cashflow & Budget Workspace</h1>
+            <p class="text-xs sm:text-sm text-slate-300 max-w-xl">Log daily expenses in seconds, settle monthly budgets on time, and track spending trends across categories.</p>
+          </div>
+          <div class="grid grid-cols-3 gap-2 sm:gap-3 text-left shrink-0">
+            <div class="bg-white/10 rounded-2xl p-3 sm:p-3.5 border border-white/10 min-w-0">
+              <div class="text-[11px] text-slate-300">Records</div>
+              <div id="home-stat-records" class="text-sm sm:text-lg font-extrabold tabular-nums mt-0.5 truncate">0</div>
+            </div>
+            <div class="bg-white/10 rounded-2xl p-3 sm:p-3.5 border border-white/10 min-w-0">
+              <div class="text-[11px] text-amber-300">Pending</div>
+              <div id="home-stat-pending" class="text-sm sm:text-lg font-extrabold text-amber-300 tabular-nums mt-0.5 truncate">0</div>
+            </div>
+            <div class="bg-white/10 rounded-2xl p-3 sm:p-3.5 border border-white/10 min-w-0">
+              <div class="text-[11px] text-emerald-300">Spent</div>
+              <div id="home-stat-actual" class="text-sm sm:text-lg font-extrabold text-emerald-300 tabular-nums mt-0.5 truncate">0.00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <button type="button" onclick="navigateTo('entry')" class="text-left bg-white dark:bg-slate-900 hover:border-emerald-500 border-2 border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xs transition-all cursor-pointer">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3">
+            <i data-lucide="plus-circle" class="w-5 h-5"></i>
+          </div>
+          <h2 class="text-base font-bold text-slate-900 dark:text-white">Record Entry</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Log daily actual expenses, settle monthly budgets, or schedule recurring items.</p>
+        </button>
+
+        <button type="button" onclick="navigateTo('dashboard')" class="text-left bg-white dark:bg-slate-900 hover:border-indigo-500 border-2 border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xs transition-all cursor-pointer">
+          <div class="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-3">
+            <i data-lucide="pie-chart" class="w-5 h-5"></i>
+          </div>
+          <h2 class="text-base font-bold text-slate-900 dark:text-white">Dashboard</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Analyze spending trends, Year-on-Year comparisons, category share, and pivot summaries.</p>
+        </button>
+
+        <button type="button" onclick="navigateTo('ledger')" class="text-left bg-white dark:bg-slate-900 hover:border-slate-500 border-2 border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xs transition-all cursor-pointer">
+          <div class="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center mb-3">
+            <i data-lucide="table-2" class="w-5 h-5"></i>
+          </div>
+          <h2 class="text-base font-bold text-slate-900 dark:text-white">Ledger</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Inspect, filter, and export your full 27-column Excel-compatible transaction table.</p>
+        </button>
+
+        <button type="button" onclick="navigateTo('master')" class="text-left bg-white dark:bg-slate-900 hover:border-amber-500 border-2 border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xs transition-all cursor-pointer">
+          <div class="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-3">
+            <i data-lucide="database" class="w-5 h-5"></i>
+          </div>
+          <h2 class="text-base font-bold text-slate-900 dark:text-white">Master Data</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Customize categories, recurring triggers, and frequency options used across forms.</p>
+        </button>
+
+        <button type="button" onclick="navigateTo('settings')" class="text-left bg-white dark:bg-slate-900 hover:border-sky-500 border-2 border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xs transition-all cursor-pointer">
+          <div class="w-10 h-10 rounded-2xl bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-400 flex items-center justify-center mb-3">
+            <i data-lucide="settings" class="w-5 h-5"></i>
+          </div>
+          <h2 class="text-base font-bold text-slate-900 dark:text-white">Settings & Backups</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Manage theme, landing preferences, CSV imports, and full JSON backups.</p>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- MOBILE SLIDING DRAWER MENU (Triggered by 3-Bar Icon)                  -->
+  <!-- ===================================================================== -->
+  <div id="mobile-menu-drawer" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs md:hidden" onclick="if(event.target===this) toggleMobileMenu()">
+    <aside class="w-72 max-w-[82vw] h-full bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col">
+      <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-slate-900 dark:bg-white flex items-center justify-center">
+            <span class="font-black text-xs tracking-tighter text-white dark:text-slate-900">ORO</span>
+          </div>
+          <span class="font-semibold text-sm text-slate-700 dark:text-slate-200">The Money Tracker</span>
+        </div>
+        <button type="button" onclick="toggleMobileMenu()" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <nav class="flex-1 p-3 space-y-1">
+        <button type="button" onclick="navigateTo('entry'); toggleMobileMenu();" id="mnav-entry"
+          class="mnav-btn w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>Entry</span>
+        </button>
+        <button type="button" onclick="navigateTo('dashboard'); toggleMobileMenu();" id="mnav-dashboard"
+          class="mnav-btn w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          <span>Dashboard</span>
+        </button>
+        <button type="button" onclick="navigateTo('ledger'); toggleMobileMenu();" id="mnav-ledger"
+          class="mnav-btn w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+          <i data-lucide="table-2" class="w-4 h-4"></i>
+          <span>Ledger</span>
+        </button>
+        <button type="button" onclick="navigateTo('master'); toggleMobileMenu();" id="mnav-master"
+          class="mnav-btn w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+          <i data-lucide="database" class="w-4 h-4"></i>
+          <span>Master</span>
+        </button>
+        <button type="button" onclick="navigateTo('settings'); toggleMobileMenu();" id="mnav-settings"
+          class="mnav-btn w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+          <i data-lucide="settings" class="w-4 h-4"></i>
+          <span>Settings</span>
+        </button>
+        <button type="button" onclick="navigateTo('home'); toggleMobileMenu();" id="mnav-home"
+          class="mnav-btn w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+          <i data-lucide="layout-grid" class="w-4 h-4"></i>
+          <span>Overview</span>
+        </button>
+      </nav>
+    </aside>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: ACTUALIZE OR EDIT RECORD                                       -->
+  <!-- ===================================================================== -->
+  <div id="actualize-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white dark:bg-slate-900 w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
+      <div class="px-5 py-4 bg-slate-900 text-white flex items-center justify-between">
+        <h3 id="modal-title" class="text-base font-extrabold">Update Record</h3>
+        <button type="button" onclick="closeActualizeModal()" class="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white cursor-pointer">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form id="modal-edit-form" onsubmit="handleModalRecordSave(event)" class="p-5 space-y-4 max-h-[82vh] overflow-y-auto">
+        <input type="hidden" id="mod-id" />
+
+        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
+          <div>
+            <span class="text-slate-500">Budget Date:</span>
+            <strong id="mod-info-bdate" class="text-slate-900 dark:text-white ml-1">—</strong>
+          </div>
+          <div>
+            <span class="text-slate-500">Budgeted:</span>
+            <strong id="mod-info-bamt" class="text-indigo-600 dark:text-indigo-400 ml-1">0.00</strong>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Actual Date</label>
+            <input type="date" id="mod-actual-date"
+              class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2.5 text-sm font-semibold text-slate-900 dark:text-white outline-none" />
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400">Actual Amount</label>
+              <span id="calc-preview-mod-actual-amount" class="hidden text-[10px] font-bold text-emerald-700 dark:text-emerald-300"></span>
+            </div>
+            <input type="text" id="mod-actual-amount" inputmode="decimal"
+              oninput="previewMathInput(this)" onblur="commitMathInput(this)" onkeydown="handleMathKeydown(event, this)"
+              class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2.5 text-sm font-extrabold text-slate-900 dark:text-white outline-none tabular-nums" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Description *</label>
+          <input type="text" id="mod-task" required
+            class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white outline-none" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3.5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Category</label>
+            <div class="relative">
+              <input type="text" id="mod-cat1" autocomplete="off"
+                onfocus="openCategoryDropdown('mod-cat1')"
+                oninput="filterCategoryDropdown('mod-cat1'); mirrorCategoryToAlt('mod-cat1', 'mod-cat2')"
+                onkeydown="handleCategoryKeydown(event, 'mod-cat1', 'mod-cat2')"
+                class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 pl-3 pr-8 py-2.5 text-xs font-semibold text-slate-900 dark:text-white outline-none" />
+              <button type="button" tabindex="-1" onclick="toggleCategoryDropdown('mod-cat1')"
+                class="absolute inset-y-0 right-0 px-2.5 flex items-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer">
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+              </button>
+              <div id="mod-cat1-dropdown" class="cat-combo-menu hidden absolute z-30 left-0 right-0 mt-1 max-h-44 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg py-1"></div>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Alt Category</label>
+            <div class="relative">
+              <input type="text" id="mod-cat2" autocomplete="off"
+                onfocus="openCategoryDropdown('mod-cat2')"
+                oninput="this.dataset.customized = 'true'; filterCategoryDropdown('mod-cat2')"
+                onkeydown="handleCategoryKeydown(event, 'mod-cat2')"
+                class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 pl-3 pr-8 py-2.5 text-xs font-semibold text-slate-900 dark:text-white outline-none" />
+              <button type="button" tabindex="-1" onclick="toggleCategoryDropdown('mod-cat2')"
+                class="absolute inset-y-0 right-0 px-2.5 flex items-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer">
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+              </button>
+              <div id="mod-cat2-dropdown" class="cat-combo-menu hidden absolute z-30 left-0 right-0 mt-1 max-h-44 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg py-1"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3.5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Budget Date</label>
+            <input type="date" id="mod-budget-date"
+              class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white outline-none" />
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400">Budget Amount</label>
+              <span id="calc-preview-mod-budget-amount" class="hidden text-[10px] font-bold text-indigo-700 dark:text-indigo-300"></span>
+            </div>
+            <input type="text" id="mod-budget-amount" inputmode="decimal"
+              oninput="previewMathInput(this)" onblur="commitMathInput(this)" onkeydown="handleMathKeydown(event, this)"
+              class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none tabular-nums" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-4 gap-2">
+          <div>
+            <label class="block text-[10px] font-bold text-sky-600 mb-1">Income</label>
+            <input type="text" id="mod-income" inputmode="decimal" onblur="commitMathInput(this)"
+              class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-2.5 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-emerald-600 mb-1">Invest</label>
+            <input type="text" id="mod-investment" inputmode="decimal" onblur="commitMathInput(this)"
+              class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-2.5 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 mb-1">USD</label>
+            <input type="text" id="mod-usd" inputmode="decimal" onblur="commitMathInput(this)"
+              class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-2.5 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 mb-1">GBP</label>
+            <input type="text" id="mod-gbp" inputmode="decimal" onblur="commitMathInput(this)"
+              class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-2.5 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Remarks</label>
+          <input type="text" id="mod-remarks"
+            class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-2 text-xs text-slate-900 dark:text-white outline-none" />
+        </div>
+
+        <div class="flex gap-2.5 pt-2">
+          <button type="button" onclick="closeActualizeModal()"
+            class="flex-1 py-3 rounded-2xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
+            Cancel
+          </button>
+          <button type="submit"
+            class="flex-2 py-3 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-md cursor-pointer">
+            Save
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- DRAWER: OVERDUE & PENDING ALERTS                                      -->
+  <!-- ===================================================================== -->
+  <div id="notifications-drawer" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex justify-end" onclick="if(event.target===this) toggleNotificationsDrawer()">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-md h-full shadow-2xl border-l border-slate-200 dark:border-slate-800 flex flex-col">
+      <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <h3 class="text-base font-extrabold text-slate-900 dark:text-white">Alerts</h3>
+        <button type="button" onclick="toggleNotificationsDrawer()" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 cursor-pointer">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div id="notifications-list" class="flex-1 overflow-y-auto p-4 space-y-2.5"></div>
+      <div class="p-4 border-t border-slate-200 dark:border-slate-800">
+        <button type="button" onclick="toggleNotificationsDrawer(); openPendingBudgetsFromDashboard();"
+          class="w-full py-3 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold cursor-pointer">
+          Open Budgets
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast-container" class="fixed bottom-6 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- ===================================================================== -->
+  <!-- APPLICATION LOGIC (27-Column Schema + VBA Macro Parity)               -->
+  <!-- ===================================================================== -->
+  <script>
+    // =========================================================================
+    // 1. MASTER DATA & STORAGE KEYS
+    // =========================================================================
+    const STORAGE_RECORDS_KEY = "budget_pwa_records_v2";
+    const STORAGE_MASTER_KEY = "budget_pwa_master_v2";
+    const STORAGE_SETTINGS_KEY = "budget_pwa_settings_v2";
+    const STORAGE_ACTIVE_TAG_KEY = "oro_active_event_tag_v1";
+    const STORAGE_CLOUD_CFG_KEY = "oro_supabase_cfg_v1";
+    const STORAGE_CLOUD_DELETED_KEY = "oro_supabase_deleted_v1";
+
+    let supabaseClient = null;
+    let supabaseUser = null;
+    let deletedRecordIds = [];
+    let cloudSyncTimer = null;
+
+    const DEFAULT_MASTER = {
+      categories: [
+        "Charity", "Clothing", "Communication", "Construction and Repair",
+        "Digital Subscriptions", "Eat-Out", "Education", "Employment",
+        "Entertainment", "Family", "Gifts", "Groceries", "Health",
+        "House Construction", "Insurance", "Interest", "Investments",
+        "Loans", "Meals", "Self", "Side Hustles", "Son", "Spiritual",
+        "Transport", "Utilities", "Vehicle"
+      ],
+      recurringOptions: ["No", "Recurring", "Yes"],
+      frequencies: ["Weekly", "Monthly", "Quarterly", "Yearly"]
+    };
+
+    const MONTH_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const EXCEL_27_HEADERS = [
+      "Actual Date", "Task", "Category", "Category 2", "Actual Amount",
+      "Balance to Pay", "Income", "Investment", "USD", "GBP",
+      "Budgeted Date", "Budget Amount", "Recurring", "Frequency", "From", "To",
+      "Compliance", "Payment", "Income Year", "Income Month",
+      "Investment Year", "Investment Month", "Budget Year", "Budget Month",
+      "Expense Year", "Expense Month", "Remarks"
+    ];
+
+    let records = [];
+    let masterData = JSON.parse(JSON.stringify(DEFAULT_MASTER));
+    let appSettings = {
+      theme: "light",
+      defaultLanding: "dashboard",
+      currency: "LKR"
+    };
+    let entryBudgetStatusFilter = "ALL";
+    let activeEventTag = "";
+    let chartInstances = { trend: null, pie: null, bar: null };
+
+    // =========================================================================
+    // 2. SAFE MATH EXPRESSION EVALUATOR (e.g., "1000+100-50" -> 1050)
+    // =========================================================================
+    function evaluateMathExpression(rawVal) {
+      if (rawVal === null || rawVal === undefined) return null;
+      const cleaned = String(rawVal).replace(/,/g, "").trim();
+      if (cleaned === "") return null;
+      if (!/^[0-9+\-*/().\s]+$/.test(cleaned)) {
+        const fallback = parseFloat(cleaned);
+        return isNaN(fallback) ? null : fallback;
+      }
+      try {
+        const result = Function(`"use strict"; return (${cleaned});`)();
+        if (typeof result === "number" && isFinite(result)) {
+          return Math.round(result * 100) / 100;
+        }
+        return null;
+      } catch {
+        return null;
+      }
+    }
+
+    function previewMathInput(inputEl) {
+      const badge = document.getElementById(`calc-preview-${inputEl.id}`);
+      if (!badge) return;
+      const raw = inputEl.value.trim();
+      if (!raw || !/[+\-*/()]/.test(raw)) {
+        badge.classList.add("hidden");
+        return;
+      }
+      const val = evaluateMathExpression(raw);
+      if (val !== null) {
+        badge.textContent = `= ${formatNum(val)}`;
+        badge.classList.remove("hidden");
+      } else {
+        badge.classList.add("hidden");
+      }
+    }
+
+    function commitMathInput(inputEl) {
+      const val = evaluateMathExpression(inputEl.value);
+      const badge = document.getElementById(`calc-preview-${inputEl.id}`);
+      if (badge) badge.classList.add("hidden");
+      if (val !== null) {
+        inputEl.value = val;
+      }
+    }
+
+    function handleMathKeydown(event, inputEl) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        commitMathInput(inputEl);
+      }
+    }
+
+    // =========================================================================
+    // 3. EXACT 27-COLUMN FORMULA ENGINE & RECURRING MACRO PARITY
+    // =========================================================================
+    function computeRowFormulas(raw) {
+      const hasActualAmt = raw.actualAmount !== "" && raw.actualAmount !== null && raw.actualAmount !== undefined && !isNaN(Number(raw.actualAmount));
+      const actualAmount = hasActualAmt ? Number(raw.actualAmount) : null;
+      const budgetAmount = (raw.budgetAmount !== "" && raw.budgetAmount !== null && raw.budgetAmount !== undefined && !isNaN(Number(raw.budgetAmount)))
+        ? Number(raw.budgetAmount) : 0;
+      const income = (raw.income !== "" && raw.income !== null && !isNaN(Number(raw.income))) ? Number(raw.income) : 0;
+      const investment = (raw.investment !== "" && raw.investment !== null && !isNaN(Number(raw.investment))) ? Number(raw.investment) : 0;
+      const usd = (raw.usd !== "" && raw.usd !== null && !isNaN(Number(raw.usd))) ? Number(raw.usd) : 0;
+      const gbp = (raw.gbp !== "" && raw.gbp !== null && !isNaN(Number(raw.gbp))) ? Number(raw.gbp) : 0;
+
+      const balanceToPay = budgetAmount - (actualAmount !== null ? actualAmount : 0);
+      const compliance = (budgetAmount === 0 || balanceToPay < 0) ? "Non Budgeted" : "Budgeted";
+      const payment = hasActualAmt ? "Paid" : "Pending";
+
+      const actDateObj = parseISODate(raw.actualDate);
+      const budDateObj = parseISODate(raw.budgetedDate);
+
+      const incomeYear = (income > 0 && actDateObj) ? actDateObj.getFullYear() : "";
+      const incomeMonth = (income > 0 && actDateObj) ? (actDateObj.getMonth() + 1) : "";
+
+      const investmentYear = (investment > 0 && actDateObj) ? actDateObj.getFullYear() : "";
+      const investmentMonth = (investment > 0 && actDateObj) ? (actDateObj.getMonth() + 1) : "";
+
+      const budgetYear = budDateObj ? budDateObj.getFullYear() : "";
+      const budgetMonth = budDateObj ? MONTH_SHORT[budDateObj.getMonth()] : "";
+
+      const expenseYear = actDateObj ? actDateObj.getFullYear() : "";
+      const expenseMonth = actDateObj ? (actDateObj.getMonth() + 1) : "";
+
+      return {
+        id: raw.id || generateId(),
+        actualDate: raw.actualDate || "",
+        task: (raw.task || "").trim(),
+        category: raw.category || "",
+        category2: raw.category2 || "",
+        actualAmount: actualAmount,
+        balanceToPay: balanceToPay,
+        income: income,
+        investment: investment,
+        usd: usd,
+        gbp: gbp,
+        budgetedDate: raw.budgetedDate || "",
+        budgetAmount: budgetAmount,
+        recurring: raw.recurring !== undefined && raw.recurring !== null ? raw.recurring : "No",
+        frequency: raw.frequency || "",
+        fromDate: raw.fromDate || "",
+        toDate: raw.toDate || "",
+        compliance: compliance,
+        payment: payment,
+        incomeYear: incomeYear,
+        incomeMonth: incomeMonth,
+        investmentYear: investmentYear,
+        investmentMonth: investmentMonth,
+        budgetYear: budgetYear,
+        budgetMonth: budgetMonth,
+        expenseYear: expenseYear,
+        expenseMonth: expenseMonth,
+        remarks: raw.remarks || ""
+      };
+    }
+
+    function expandRecurringSchedule(seedRow) {
+      const startObj = parseISODate(seedRow.budgetedDate || seedRow.fromDate);
+      const endObj = parseISODate(seedRow.toDate);
+      const freq = (seedRow.frequency || "").trim().toLowerCase();
+
+      if (!startObj || !endObj || endObj < startObj || !freq) {
+        return [computeRowFormulas({ ...seedRow, recurring: "Processed" })];
+      }
+
+      const generated = [];
+      let stepIndex = 1;
+      let cursor = addFrequencyStep(startObj, freq, stepIndex);
+
+      while (cursor <= endObj && stepIndex <= 600) {
+        const isoDate = toISODateString(cursor);
+        generated.push(computeRowFormulas({
+          ...seedRow,
+          id: generateId(),
+          actualDate: "",
+          actualAmount: null,
+          budgetedDate: isoDate,
+          recurring: "",
+          frequency: seedRow.frequency,
+          fromDate: seedRow.fromDate,
+          toDate: seedRow.toDate
+        }));
+        stepIndex++;
+        cursor = addFrequencyStep(startObj, freq, stepIndex);
+      }
+
+      const processedOrigin = computeRowFormulas({
+        ...seedRow,
+        recurring: "Processed"
+      });
+
+      return [processedOrigin, ...generated];
+    }
+
+    function addFrequencyStep(baseDate, freqLower, stepCount) {
+      const d = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate());
+      if (freqLower === "weekly") {
+        d.setDate(d.getDate() + (7 * stepCount));
+      } else if (freqLower === "monthly") {
+        d.setMonth(d.getMonth() + (1 * stepCount));
+      } else if (freqLower === "quarterly") {
+        d.setMonth(d.getMonth() + (3 * stepCount));
+      } else if (freqLower === "yearly") {
+        d.setFullYear(d.getFullYear() + (1 * stepCount));
+      }
+      return d;
+    }
+
+    function runRecurringMacro() {
+      let generatedTotal = 0;
+      const updatedList = [];
+
+      records.forEach(r => {
+        if ((r.recurring || "").trim() === "Recurring") {
+          const batch = expandRecurringSchedule(r);
+          generatedTotal += Math.max(0, batch.length - 1);
+          updatedList.push(...batch);
+        } else {
+          updatedList.push(r);
+        }
+      });
+
+      if (generatedTotal === 0) {
+        showToast("No 'Recurring' rows found to expand.", "info");
+        return;
+      }
+
+      records = updatedList;
+      saveState();
+      refreshAllViews();
+      showToast(`Generated ${generatedTotal} recurring rows.`, "success");
+    }
+
+    function syncYearDropdowns() {
+      const yearsSet = new Set([String(new Date().getFullYear())]);
+      records.forEach(r => {
+        if (r.budgetYear) yearsSet.add(String(r.budgetYear));
+        if (r.expenseYear) yearsSet.add(String(r.expenseYear));
+        if (r.incomeYear) yearsSet.add(String(r.incomeYear));
+        if (r.investmentYear) yearsSet.add(String(r.investmentYear));
+      });
+
+      const sortedYears = [...yearsSet].sort((a, b) => Number(b) - Number(a));
+      ["entry-filter-year", "dash-year", "filter-year"].forEach(id => {
+        const sel = document.getElementById(id);
+        if (!sel) return;
+        const prev = sel.value;
+        sel.innerHTML = `<option value="ALL">All Years</option>` +
+          sortedYears.map(y => `<option value="${y}">${y}</option>`).join("");
+        if ([...sel.options].some(o => o.value === prev)) {
+          sel.value = prev;
+        }
+      });
+    }
+
+    // =========================================================================
+    // 4. INITIALIZATION & THEME MANAGEMENT (LIGHT MODE DEFAULT)
+    // =========================================================================
+    let lastScrollY = 0;
+    function initMobileSmartHeader() {
+      const header = document.getElementById("main-header");
+      if (!header) return;
+      window.addEventListener("scroll", () => {
+        if (window.innerWidth >= 768) {
+          header.style.transform = "translateY(0)";
+          return;
+        }
+        const currentY = window.scrollY;
+        if (currentY > 56 && currentY > lastScrollY) {
+          header.style.transform = "translateY(-100%)";
+        } else {
+          header.style.transform = "translateY(0)";
+        }
+        lastScrollY = currentY;
+      }, { passive: true });
+    }
+
+    window.onload = function () {
+      initTheme();
+      initMobileSmartHeader();
+      loadState();
+      populateMasterDropdowns();
+      renderMasterLists();
+      initQuickActualDefaults();
+      initPlanBudgetDefaults();
+      initEntryBudgetMonthFilter();
+      syncYearDropdowns();
+      refreshTaskSuggestions();
+      syncTagFilters();
+      restoreActiveEventTag();
+      updateNotifications();
+      registerPWA();
+      initSupabaseCloud();
+
+      // Determine landing page
+      let startView = appSettings.defaultLanding;
+      if (startView === "adaptive") {
+        startView = window.innerWidth < 768 ? "entry" : "dashboard";
+      }
+      navigateTo(startView);
+      lucide.createIcons();
+    };
+
+    function initTheme() {
+      const savedSettings = localStorage.getItem(STORAGE_SETTINGS_KEY);
+      if (savedSettings) {
+        try { appSettings = { ...appSettings, ...JSON.parse(savedSettings) }; } catch {}
+      }
+      applyTheme(appSettings.theme || "light");
+    }
+
+    function applyTheme(theme) {
+      appSettings.theme = theme;
+      const htmlEl = document.documentElement;
+      const moonIcon = document.getElementById("theme-icon-moon");
+      const sunIcon = document.getElementById("theme-icon-sun");
+      const settingsBtn = document.getElementById("settings-theme-btn");
+
+      if (theme === "dark") {
+        htmlEl.classList.add("dark");
+        if (moonIcon) moonIcon.classList.add("hidden");
+        if (sunIcon) sunIcon.classList.remove("hidden");
+        if (settingsBtn) settingsBtn.textContent = "Switch to Light";
+      } else {
+        htmlEl.classList.remove("dark");
+        if (moonIcon) moonIcon.classList.remove("hidden");
+        if (sunIcon) sunIcon.classList.add("hidden");
+        if (settingsBtn) settingsBtn.textContent = "Switch to Dark";
+      }
+      localStorage.setItem(STORAGE_SETTINGS_KEY, JSON.stringify(appSettings));
+      if (document.getElementById("page-dashboard")?.classList.contains("active")) {
+        renderDashboard();
+      }
+    }
+
+    function toggleTheme() {
+      applyTheme(appSettings.theme === "dark" ? "light" : "dark");
+    }
+
+    // =========================================================================
+    // 5. NAVIGATION & TAB SWITCHING
+    // =========================================================================
+    function toggleMobileMenu() {
+      const drawer = document.getElementById("mobile-menu-drawer");
+      drawer.classList.toggle("hidden");
+      lucide.createIcons();
+    }
+
+    function navigateTo(viewName, options = {}) {
+      document.querySelectorAll(".page-view").forEach(el => el.classList.remove("active"));
+      const target = document.getElementById(`page-${viewName}`);
+      if (target) target.classList.add("active");
+
+      // Update Desktop Pills
+      document.querySelectorAll(".nav-pill").forEach(btn => {
+        btn.classList.remove("bg-white", "dark:bg-slate-900", "text-slate-900", "dark:text-white", "shadow-2xs");
+        btn.classList.add("text-slate-600", "dark:text-slate-400");
+      });
+      const activeDesk = document.getElementById(`nav-${viewName}`);
+      if (activeDesk) {
+        activeDesk.classList.remove("text-slate-600", "dark:text-slate-400");
+        activeDesk.classList.add("bg-white", "dark:bg-slate-900", "text-slate-900", "dark:text-white", "shadow-2xs");
+      }
+
+      // Update Mobile Drawer Items
+      document.querySelectorAll(".mnav-btn").forEach(btn => {
+        btn.classList.remove("text-emerald-700", "dark:text-emerald-400", "bg-emerald-50", "dark:bg-emerald-950/50");
+        btn.classList.add("text-slate-600", "dark:text-slate-300");
+      });
+      const activeMob = document.getElementById(`mnav-${viewName}`);
+      if (activeMob) {
+        activeMob.classList.remove("text-slate-600", "dark:text-slate-300");
+        activeMob.classList.add("text-emerald-700", "dark:text-emerald-400", "bg-emerald-50", "dark:bg-emerald-950/50");
+      }
+
+      if (viewName === "dashboard") renderDashboard();
+      if (viewName === "ledger") applyLedgerFilters();
+      if (viewName === "entry") {
+        if (!options.keepTab) switchEntryTab("actual");
+        renderEntryBudgetList();
+      }
+      if (viewName === "home") updateHomeStats();
+
+      const header = document.getElementById("main-header");
+      if (header) header.style.transform = "translateY(0)";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      lucide.createIcons();
+    }
+
+    function switchEntryTab(tabName) {
+      document.querySelectorAll(".entry-subtab").forEach(el => el.classList.remove("active"));
+      document.getElementById(`entry-subtab-${tabName}`).classList.add("active");
+
+      document.querySelectorAll(".subtab-btn").forEach(btn => {
+        btn.classList.remove("bg-slate-900", "dark:bg-emerald-600", "text-white", "shadow-xs");
+        btn.classList.add("text-slate-600", "dark:text-slate-400", "hover:bg-slate-100", "dark:hover:bg-slate-800");
+      });
+
+      const activeBtn = document.getElementById(`subtab-btn-${tabName}`);
+      activeBtn.classList.remove("text-slate-600", "dark:text-slate-400", "hover:bg-slate-100", "dark:hover:bg-slate-800");
+      activeBtn.classList.add("bg-slate-900", "dark:bg-emerald-600", "text-white", "shadow-xs");
+
+      if (tabName === "budgets") renderEntryBudgetList();
+      lucide.createIcons();
+    }
+
+    function openPendingBudgetsFromDashboard() {
+      const now = new Date();
+      document.getElementById("entry-filter-month").value = MONTH_SHORT[now.getMonth()];
+      const curY = String(now.getFullYear());
+      const yrSel = document.getElementById("entry-filter-year");
+      if ([...yrSel.options].some(o => o.value === curY)) yrSel.value = curY;
+
+      navigateTo("entry", { keepTab: true });
+      switchEntryTab("budgets");
+      setEntryStatusFilter("Pending");
+    }
+
+    // =========================================================================
+    // 6. SMART AUTOCOMPLETE, CATEGORY MIRRORING & EVENT TAGS
+    // =========================================================================
+    const CAT_COMBO_IDS = ["qa-cat1", "qa-cat2", "pb-cat1", "pb-cat2", "mod-cat1", "mod-cat2"];
+    let catComboActiveIndex = -1;
+
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".relative")) {
+        closeAllCategoryDropdowns();
+      }
+    });
+
+    function closeAllCategoryDropdowns(exceptId = null) {
+      CAT_COMBO_IDS.forEach(id => {
+        if (id === exceptId) return;
+        const menu = document.getElementById(`${id}-dropdown`);
+        if (menu) menu.classList.add("hidden");
+      });
+      catComboActiveIndex = -1;
+    }
+
+    function openCategoryDropdown(inputId) {
+      closeAllCategoryDropdowns(inputId);
+      renderCategoryDropdownOptions(inputId, false);
+    }
+
+    function toggleCategoryDropdown(inputId) {
+      const menu = document.getElementById(`${inputId}-dropdown`);
+      const input = document.getElementById(inputId);
+      if (!menu || !input) return;
+      const isHidden = menu.classList.contains("hidden");
+      closeAllCategoryDropdowns();
+      if (isHidden) {
+        input.focus();
+        renderCategoryDropdownOptions(inputId, false);
+      }
+    }
+
+    function filterCategoryDropdown(inputId) {
+      closeAllCategoryDropdowns(inputId);
+      renderCategoryDropdownOptions(inputId, true);
+    }
+
+    function renderCategoryDropdownOptions(inputId, filterByQuery) {
+      const input = document.getElementById(inputId);
+      const menu = document.getElementById(`${inputId}-dropdown`);
+      if (!input || !menu) return;
+
+      const query = filterByQuery ? (input.value || "").trim().toLowerCase() : "";
+      const list = query
+        ? masterData.categories.filter(c => c.toLowerCase().includes(query))
+        : masterData.categories;
+
+      catComboActiveIndex = -1;
+
+      if (list.length === 0) {
+        menu.innerHTML = `<div class="px-3.5 py-2 text-xs text-slate-400">No matching category</div>`;
+      } else {
+        menu.innerHTML = list.map((cat, idx) => `
+          <button type="button" data-cat-idx="${idx}"
+            onmousedown="event.preventDefault(); selectCategoryOption('${inputId}', '${escapeHtml(cat).replace(/'/g, "\\'")}')"
+            class="cat-combo-opt w-full text-left px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+            ${escapeHtml(cat)}
+          </button>
+        `).join("");
+      }
+      menu.classList.remove("hidden");
+    }
+
+    function selectCategoryOption(inputId, value) {
+      const input = document.getElementById(inputId);
+      const menu = document.getElementById(`${inputId}-dropdown`);
+      if (!input) return;
+      input.value = value;
+      if (menu) menu.classList.add("hidden");
+      catComboActiveIndex = -1;
+
+      if (inputId.endsWith("-cat1")) {
+        const altId = inputId.replace("-cat1", "-cat2");
+        mirrorCategoryToAlt(inputId, altId);
+      } else if (inputId.endsWith("-cat2")) {
+        input.dataset.customized = "true";
+      }
+    }
+
+    function handleCategoryKeydown(event, inputId) {
+      const menu = document.getElementById(`${inputId}-dropdown`);
+      if (!menu || menu.classList.contains("hidden")) return;
+      const items = menu.querySelectorAll(".cat-combo-opt");
+      if (!items.length) return;
+
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        catComboActiveIndex = (catComboActiveIndex + 1) % items.length;
+        highlightCategoryOption(items);
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        catComboActiveIndex = (catComboActiveIndex - 1 + items.length) % items.length;
+        highlightCategoryOption(items);
+      } else if (event.key === "Enter" && catComboActiveIndex >= 0) {
+        event.preventDefault();
+        items[catComboActiveIndex].dispatchEvent(new MouseEvent("mousedown"));
+      } else if (event.key === "Escape") {
+        menu.classList.add("hidden");
+        catComboActiveIndex = -1;
+      }
+    }
+
+    function highlightCategoryOption(items) {
+      items.forEach((btn, i) => {
+        if (i === catComboActiveIndex) {
+          btn.classList.add("bg-emerald-50", "dark:bg-slate-800");
+          btn.scrollIntoView({ block: "nearest" });
+        } else {
+          btn.classList.remove("bg-emerald-50", "dark:bg-slate-800");
+        }
+      });
+    }
+
+    function mirrorCategoryToAlt(cat1Id, cat2Id) {
+      const cat1El = document.getElementById(cat1Id);
+      const cat2El = document.getElementById(cat2Id);
+      if (!cat1El || !cat2El) return;
+      if (cat2El.dataset.customized !== "true" || !cat2El.value) {
+        cat2El.value = cat1El.value;
+      }
+    }
+
+    function refreshTaskSuggestions() {
+      const datalist = document.getElementById("task-suggestions-list");
+      if (!datalist) return;
+      const seen = new Map();
+      for (let i = records.length - 1; i >= 0; i--) {
+        const t = (records[i].task || "").trim();
+        if (t && !seen.has(t.toLowerCase())) {
+          seen.set(t.toLowerCase(), records[i]);
+        }
+      }
+      datalist.innerHTML = [...seen.values()]
+        .slice(0, 120)
+        .map(r => `<option value="${escapeHtml(r.task)}">${escapeHtml(r.category || "")}</option>`)
+        .join("");
+    }
+
+    function handleTaskAutoMatch(val) {
+      const trimmed = (val || "").trim().toLowerCase();
+      if (!trimmed) return;
+      for (let i = records.length - 1; i >= 0; i--) {
+        if ((records[i].task || "").trim().toLowerCase() === trimmed) {
+          const cat1El = document.getElementById("qa-cat1");
+          const cat2El = document.getElementById("qa-cat2");
+          if (records[i].category && masterData.categories.includes(records[i].category)) {
+            cat1El.value = records[i].category;
+          }
+          if (records[i].category2 && masterData.categories.includes(records[i].category2)) {
+            cat2El.value = records[i].category2;
+            cat2El.dataset.customized = "true";
+          } else {
+            cat2El.value = cat1El.value;
+            cat2El.dataset.customized = "false";
+          }
+          break;
+        }
+      }
+    }
+
+    function handlePlanTaskAutoMatch(val) {
+      const trimmed = (val || "").trim().toLowerCase();
+      if (!trimmed) return;
+      for (let i = records.length - 1; i >= 0; i--) {
+        if ((records[i].task || "").trim().toLowerCase() === trimmed) {
+          const cat1El = document.getElementById("pb-cat1");
+          const cat2El = document.getElementById("pb-cat2");
+          if (records[i].category && masterData.categories.includes(records[i].category)) {
+            cat1El.value = records[i].category;
+          }
+          if (records[i].category2 && masterData.categories.includes(records[i].category2)) {
+            cat2El.value = records[i].category2;
+            cat2El.dataset.customized = "true";
+          } else {
+            cat2El.value = cat1El.value;
+            cat2El.dataset.customized = "false";
+          }
+          break;
+        }
+      }
+    }
+
+    function toggleEventTagPanel() {
+      const panel = document.getElementById("event-tag-panel");
+      panel.classList.toggle("hidden");
+      if (!panel.classList.contains("hidden")) {
+        document.getElementById("active-event-tag-input").focus();
+      }
+    }
+
+    function restoreActiveEventTag() {
+      const saved = localStorage.getItem(STORAGE_ACTIVE_TAG_KEY) || "";
+      activeEventTag = saved.replace(/^#+/, "").trim();
+      const input = document.getElementById("active-event-tag-input");
+      const label = document.getElementById("event-tag-btn-label");
+      const panel = document.getElementById("event-tag-panel");
+      if (input) input.value = activeEventTag;
+      if (activeEventTag) {
+        if (label) label.textContent = `#${activeEventTag}`;
+        if (panel) panel.classList.remove("hidden");
+      } else {
+        if (label) label.textContent = "Tag";
+      }
+    }
+
+    function saveActiveEventTag(raw) {
+      activeEventTag = (raw || "").replace(/[^a-zA-Z0-9_-]/g, "");
+      localStorage.setItem(STORAGE_ACTIVE_TAG_KEY, activeEventTag);
+      const label = document.getElementById("event-tag-btn-label");
+      if (label) label.textContent = activeEventTag ? `#${activeEventTag}` : "Tag";
+    }
+
+    function clearActiveEventTag() {
+      activeEventTag = "";
+      localStorage.removeItem(STORAGE_ACTIVE_TAG_KEY);
+      document.getElementById("active-event-tag-input").value = "";
+      document.getElementById("event-tag-btn-label").textContent = "Tag";
+      document.getElementById("event-tag-panel").classList.add("hidden");
+    }
+
+    function extractAllHashTags() {
+      const tagSet = new Set();
+      records.forEach(r => {
+        const matches = (r.remarks || "").match(/#[a-zA-Z0-9_-]+/g);
+        if (matches) matches.forEach(m => tagSet.add(m));
+      });
+      return [...tagSet].sort();
+    }
+
+    function syncTagFilters() {
+      const tags = extractAllHashTags();
+      ["dash-tag", "filter-tag"].forEach(id => {
+        const sel = document.getElementById(id);
+        if (!sel) return;
+        const prev = sel.value;
+        sel.innerHTML = `<option value="ALL">All Tags</option>` +
+          tags.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
+        if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
+      });
+    }
+
+    // =========================================================================
+    // 7. SUB-TAB A: ACTUAL ENTRY
+    // =========================================================================
+    function initQuickActualDefaults() {
+      document.getElementById("qa-actual-date").value = toISODateString(new Date());
+      const cat1 = document.getElementById("qa-cat1");
+      const cat2 = document.getElementById("qa-cat2");
+      if (cat1 && cat2) {
+        cat1.value = "";
+        cat2.dataset.customized = "false";
+        cat2.value = "";
+      }
+    }
+
+    function toggleExtraActualFields() {
+      const drawer = document.getElementById("extra-actual-drawer");
+      const chevron = document.getElementById("extra-actual-chevron");
+      drawer.classList.toggle("hidden");
+      chevron.classList.toggle("rotate-180");
+    }
+
+    function resetQuickActualForm() {
+      document.getElementById("quick-actual-form").reset();
+      initQuickActualDefaults();
+    }
+
+    function handleQuickActualSubmit(e) {
+      e.preventDefault();
+      const actualDate = document.getElementById("qa-actual-date").value;
+      const task = document.getElementById("qa-task").value.trim();
+      if (!actualDate || !task) {
+        showToast("Enter Date and Description.", "error");
+        return;
+      }
+
+      const actualAmount = evaluateMathExpression(document.getElementById("qa-actual-amount").value);
+      const income = evaluateMathExpression(document.getElementById("qa-income").value) || 0;
+      const investment = evaluateMathExpression(document.getElementById("qa-investment").value) || 0;
+      const usd = evaluateMathExpression(document.getElementById("qa-usd").value) || 0;
+      const gbp = evaluateMathExpression(document.getElementById("qa-gbp").value) || 0;
+
+      if (actualAmount === null && income === 0 && investment === 0 && usd === 0 && gbp === 0) {
+        showToast("Enter an amount.", "error");
+        return;
+      }
+
+      let remarksVal = document.getElementById("qa-remarks").value.trim();
+      if (activeEventTag) {
+        const tagToken = `#${activeEventTag}`;
+        if (!remarksVal.toLowerCase().includes(tagToken.toLowerCase())) {
+          remarksVal = remarksVal ? `${remarksVal} ${tagToken}` : tagToken;
+        }
+      }
+
+      const cat1Val = document.getElementById("qa-cat1").value;
+      const cat2Val = document.getElementById("qa-cat2").value || cat1Val;
+
+      const row = computeRowFormulas({
+        actualDate: actualDate,
+        task: task,
+        category: cat1Val,
+        category2: cat2Val,
+        actualAmount: actualAmount,
+        income: income,
+        investment: investment,
+        usd: usd,
+        gbp: gbp,
+        budgetedDate: "",
+        budgetAmount: 0,
+        recurring: "No",
+        frequency: "",
+        fromDate: "",
+        toDate: "",
+        remarks: remarksVal
+      });
+
+      records.push(row);
+      saveState();
+      refreshAllViews();
+      resetQuickActualForm();
+      showToast(`Saved "${row.task}"`, "success");
+    }
+
+    // =========================================================================
+    // 8. SUB-TAB B: BUDGETS LIST & ACTUALIZE MODAL
+    // =========================================================================
+    function initEntryBudgetMonthFilter() {
+      const now = new Date();
+      document.getElementById("entry-filter-month").value = MONTH_SHORT[now.getMonth()];
+      syncYearDropdowns();
+      const curY = String(now.getFullYear());
+      const yrSel = document.getElementById("entry-filter-year");
+      if ([...yrSel.options].some(o => o.value === curY)) yrSel.value = curY;
+    }
+
+    function shiftEntryMonth(delta) {
+      const mSel = document.getElementById("entry-filter-month");
+      const ySel = document.getElementById("entry-filter-year");
+      if (mSel.value === "ALL") {
+        mSel.value = MONTH_SHORT[new Date().getMonth()];
+        renderEntryBudgetList();
+        return;
+      }
+      let mIdx = MONTH_SHORT.indexOf(mSel.value) + delta;
+      let yearNum = ySel.value === "ALL" ? new Date().getFullYear() : Number(ySel.value);
+
+      if (mIdx < 0) { mIdx = 11; yearNum--; }
+      else if (mIdx > 11) { mIdx = 0; yearNum++; }
+
+      mSel.value = MONTH_SHORT[mIdx];
+      const yStr = String(yearNum);
+      if (![...ySel.options].some(o => o.value === yStr)) {
+        const opt = document.createElement("option");
+        opt.value = yStr;
+        opt.textContent = yStr;
+        ySel.appendChild(opt);
+      }
+      ySel.value = yStr;
+      renderEntryBudgetList();
+    }
+
+    function setEntryStatusFilter(status) {
+      entryBudgetStatusFilter = status;
+      document.querySelectorAll(".eb-filter-pill").forEach(btn => {
+        btn.classList.remove("bg-slate-900", "dark:bg-white", "text-white", "dark:text-slate-900");
+        btn.classList.add("bg-slate-100", "dark:bg-slate-800", "text-slate-600", "dark:text-slate-300");
+      });
+      const active = document.getElementById(`eb-filter-${status}`);
+      if (active) {
+        active.classList.remove("bg-slate-100", "dark:bg-slate-800", "text-slate-600", "dark:text-slate-300");
+        active.classList.add("bg-slate-900", "dark:bg-white", "text-white", "dark:text-slate-900");
+      }
+      renderEntryBudgetList();
+    }
+
+    function isRecordOverdue(r) {
+      if (r.payment !== "Pending" || !r.budgetedDate) return false;
+      const todayISO = toISODateString(new Date());
+      return r.budgetedDate < todayISO;
+    }
+
+    function renderEntryBudgetList() {
+      const mVal = document.getElementById("entry-filter-month").value;
+      const yVal = document.getElementById("entry-filter-year").value;
+      const container = document.getElementById("entry-budget-list");
+
+      const monthBudgets = records.filter(r => {
+        if (r.budgetAmount <= 0 && !r.budgetedDate) return false;
+        if (mVal !== "ALL" && r.budgetMonth !== mVal) return false;
+        if (yVal !== "ALL" && String(r.budgetYear) !== yVal) return false;
+        return true;
+      }).sort((a, b) => (a.budgetedDate || "").localeCompare(b.budgetedDate || ""));
+
+      const totBudget = monthBudgets.reduce((s, r) => s + r.budgetAmount, 0);
+      const totPaid = monthBudgets.reduce((s, r) => s + (r.actualAmount || 0), 0);
+      document.getElementById("eb-summary-budget").textContent = formatNum(totBudget);
+      document.getElementById("eb-summary-actual").textContent = formatNum(totPaid);
+
+      const filtered = monthBudgets.filter(r => {
+        if (entryBudgetStatusFilter === "Pending") return r.payment === "Pending";
+        if (entryBudgetStatusFilter === "Overdue") return isRecordOverdue(r);
+        if (entryBudgetStatusFilter === "Paid") return r.payment === "Paid";
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="col-span-full bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-10 text-center text-sm text-slate-400">No items found.</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(r => {
+        const overdue = isRecordOverdue(r);
+        const isPaid = r.payment === "Paid";
+        const badgeHtml = isPaid
+          ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">Paid</span>`
+          : overdue
+            ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300">Overdue</span>`
+            : `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">Pending</span>`;
+
+        const borderClass = overdue
+          ? "border-rose-300 dark:border-rose-800/80"
+          : isPaid
+            ? "border-slate-200 dark:border-slate-800 opacity-85"
+            : "border-slate-200 dark:border-slate-800";
+
+        return `
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border ${borderClass} shadow-2xs flex flex-col justify-between gap-3">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-sm text-slate-900 dark:text-white">${escapeHtml(r.task)}</span>
+                  ${badgeHtml}
+                </div>
+                <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  ${escapeHtml(r.category)}${r.category2 && r.category2 !== r.category ? " • " + escapeHtml(r.category2) : ""} • ${r.budgetedDate || "—"}
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-sm font-extrabold text-slate-900 dark:text-white tabular-nums">${formatNum(r.budgetAmount)}</div>
+                <div class="text-[11px] font-semibold ${isPaid ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"}">
+                  ${isPaid ? "Paid: " + formatNum(r.actualAmount) : "Bal: " + formatNum(r.balanceToPay)}
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+              ${!isPaid ? `
+                <button type="button" onclick="quickPayBudgetExact('${r.id}')"
+                  class="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer">
+                  Pay Exact
+                </button>` : ""}
+              <button type="button" onclick="openActualizeModal('${r.id}')"
+                class="flex-1 py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold cursor-pointer">
+                ${isPaid ? "Edit" : "Actualize"}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function quickPayBudgetExact(id) {
+      const idx = records.findIndex(r => r.id === id);
+      if (idx === -1) return;
+      const r = records[idx];
+      records[idx] = computeRowFormulas({
+        ...r,
+        actualDate: toISODateString(new Date()),
+        actualAmount: r.budgetAmount
+      });
+      saveState();
+      refreshAllViews();
+      showToast(`Paid "${r.task}"`, "success");
+    }
+
+    function openActualizeModal(id) {
+      const r = records.find(item => item.id === id);
+      if (!r) return;
+
+      document.getElementById("mod-id").value = r.id;
+      document.getElementById("modal-title").textContent = r.payment === "Pending" ? "Actualize" : "Edit";
+      document.getElementById("mod-info-bdate").textContent = r.budgetedDate || "—";
+      document.getElementById("mod-info-bamt").textContent = formatNum(r.budgetAmount);
+
+      document.getElementById("mod-actual-date").value = r.actualDate || toISODateString(new Date());
+      document.getElementById("mod-actual-amount").value = r.actualAmount !== null ? r.actualAmount : (r.budgetAmount || "");
+      document.getElementById("mod-task").value = r.task || "";
+      document.getElementById("mod-cat1").value = r.category || masterData.categories[0];
+      const modCat2 = document.getElementById("mod-cat2");
+      modCat2.value = r.category2 || r.category || masterData.categories[0];
+      modCat2.dataset.customized = (r.category2 && r.category2 !== r.category) ? "true" : "false";
+      document.getElementById("mod-budget-date").value = r.budgetedDate || "";
+      document.getElementById("mod-budget-amount").value = r.budgetAmount || "";
+      document.getElementById("mod-income").value = r.income || "";
+      document.getElementById("mod-investment").value = r.investment || "";
+      document.getElementById("mod-usd").value = r.usd || "";
+      document.getElementById("mod-gbp").value = r.gbp || "";
+      document.getElementById("mod-remarks").value = r.remarks || "";
+
+      document.getElementById("actualize-modal").classList.remove("hidden");
+      lucide.createIcons();
+    }
+
+    function closeActualizeModal() {
+      document.getElementById("actualize-modal").classList.add("hidden");
+    }
+
+    function handleModalRecordSave(e) {
+      e.preventDefault();
+      const id = document.getElementById("mod-id").value;
+      const idx = records.findIndex(r => r.id === id);
+      if (idx === -1) return;
+
+      const existing = records[idx];
+      const actAmt = evaluateMathExpression(document.getElementById("mod-actual-amount").value);
+      const budAmt = evaluateMathExpression(document.getElementById("mod-budget-amount").value) || 0;
+      const cat1Val = document.getElementById("mod-cat1").value;
+      const cat2Val = document.getElementById("mod-cat2").value || cat1Val;
+
+      records[idx] = computeRowFormulas({
+        ...existing,
+        actualDate: document.getElementById("mod-actual-date").value,
+        actualAmount: actAmt,
+        task: document.getElementById("mod-task").value.trim(),
+        category: cat1Val,
+        category2: cat2Val,
+        budgetedDate: document.getElementById("mod-budget-date").value,
+        budgetAmount: budAmt,
+        income: evaluateMathExpression(document.getElementById("mod-income").value) || 0,
+        investment: evaluateMathExpression(document.getElementById("mod-investment").value) || 0,
+        usd: evaluateMathExpression(document.getElementById("mod-usd").value) || 0,
+        gbp: evaluateMathExpression(document.getElementById("mod-gbp").value) || 0,
+        remarks: document.getElementById("mod-remarks").value.trim()
+      });
+
+      saveState();
+      refreshAllViews();
+      closeActualizeModal();
+      showToast("Updated.", "success");
+    }
+
+    // =========================================================================
+    // 9. SUB-TAB C: SCHEDULE
+    // =========================================================================
+    function initPlanBudgetDefaults() {
+      const today = toISODateString(new Date());
+      document.getElementById("pb-budget-date").value = today;
+      document.getElementById("pb-from-date").value = today;
+      document.getElementById("pb-recurring").value = "No";
+      const cat1 = document.getElementById("pb-cat1");
+      const cat2 = document.getElementById("pb-cat2");
+      if (cat1 && cat2) {
+        cat1.value = "";
+        cat2.dataset.customized = "false";
+        cat2.value = "";
+      }
+      togglePlanRecurringFields();
+    }
+
+    function syncPlanFromDate() {
+      const bDate = document.getElementById("pb-budget-date").value;
+      const fromEl = document.getElementById("pb-from-date");
+      if (bDate && !fromEl.value) fromEl.value = bDate;
+    }
+
+    function togglePlanRecurringFields() {
+      const recVal = document.getElementById("pb-recurring").value;
+      const datesBox = document.getElementById("plan-recurring-dates");
+      if (recVal === "Recurring" || recVal === "Yes") {
+        datesBox.classList.remove("hidden");
+      } else {
+        datesBox.classList.add("hidden");
+      }
+    }
+
+    function resetPlanBudgetForm() {
+      document.getElementById("plan-budget-form").reset();
+      initPlanBudgetDefaults();
+    }
+
+    function handlePlanBudgetSubmit(e) {
+      e.preventDefault();
+      const task = document.getElementById("pb-task").value.trim();
+      const bDate = document.getElementById("pb-budget-date").value;
+      const bAmt = evaluateMathExpression(document.getElementById("pb-budget-amount").value);
+      const recVal = document.getElementById("pb-recurring").value;
+      const freqVal = document.getElementById("pb-frequency").value;
+      const fromDate = document.getElementById("pb-from-date").value;
+      const toDate = document.getElementById("pb-to-date").value;
+
+      if (!task || !bDate || bAmt === null) {
+        showToast("Enter Description, Date, and Amount.", "error");
+        return;
+      }
+
+      if (recVal === "Recurring" && (!toDate || toDate < bDate)) {
+        showToast("Select a valid To date.", "error");
+        return;
+      }
+
+      const cat1Val = document.getElementById("pb-cat1").value;
+      const cat2Val = document.getElementById("pb-cat2").value || cat1Val;
+
+      const seed = computeRowFormulas({
+        actualDate: "",
+        task: task,
+        category: cat1Val,
+        category2: cat2Val,
+        actualAmount: null,
+        budgetedDate: bDate,
+        budgetAmount: bAmt,
+        recurring: recVal,
+        frequency: freqVal,
+        fromDate: fromDate || bDate,
+        toDate: toDate,
+        remarks: document.getElementById("pb-remarks").value.trim()
+      });
+
+      if (recVal === "Recurring") {
+        const batch = expandRecurringSchedule(seed);
+        records.push(...batch);
+        showToast(`Created ${batch.length} scheduled rows.`, "success");
+      } else {
+        records.push(seed);
+        showToast(`Scheduled "${seed.task}".`, "success");
+      }
+
+      saveState();
+      refreshAllViews();
+      resetPlanBudgetForm();
+    }
+
+    // =========================================================================
+    // 10. NOTIFICATIONS & OVERDUE ALERTS
+    // =========================================================================
+    function updateNotifications() {
+      const pendingItems = records.filter(r => r.payment === "Pending" && (r.budgetAmount > 0 || r.budgetedDate));
+      const overdueItems = pendingItems.filter(r => isRecordOverdue(r));
+
+      const pill = document.getElementById("subtab-pending-pill");
+      if (pill) pill.textContent = pendingItems.length;
+
+      const badge = document.getElementById("notif-badge");
+      if (badge) {
+        if (pendingItems.length > 0) {
+          badge.textContent = pendingItems.length;
+          badge.classList.remove("hidden");
+        } else {
+          badge.classList.add("hidden");
+        }
+      }
+
+      const listEl = document.getElementById("notifications-list");
+      if (listEl) {
+        if (pendingItems.length === 0) {
+          listEl.innerHTML = `<div class="py-12 text-center text-sm text-slate-400">No pending items.</div>`;
+        } else {
+          const sorted = [...pendingItems].sort((a, b) => (a.budgetedDate || "").localeCompare(b.budgetedDate || ""));
+          listEl.innerHTML = sorted.slice(0, 40).map(r => {
+            const over = isRecordOverdue(r);
+            return `
+              <div class="p-3.5 rounded-2xl border ${over ? "border-rose-200 dark:border-rose-900 bg-rose-50/50 dark:bg-rose-950/30" : "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50"} flex items-center justify-between gap-2">
+                <div>
+                  <div class="text-xs font-bold text-slate-900 dark:text-white">${escapeHtml(r.task)}</div>
+                  <div class="text-[11px] ${over ? "text-rose-600 dark:text-rose-400 font-bold" : "text-slate-500"}">
+                    ${over ? "OVERDUE • " : ""}${r.budgetedDate || "—"} • ${formatNum(r.budgetAmount)}
+                  </div>
+                </div>
+                <button type="button" onclick="toggleNotificationsDrawer(); openActualizeModal('${r.id}')"
+                  class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-[11px] font-bold cursor-pointer">
+                  Pay
+                </button>
+              </div>
+            `;
+          }).join("");
+        }
+      }
+
+      return { pendingCount: pendingItems.length, overdueCount: overdueItems.length };
+    }
+
+    function toggleNotificationsDrawer() {
+      document.getElementById("notifications-drawer").classList.toggle("hidden");
+      lucide.createIcons();
+    }
+
+    function requestBrowserNotifications() {
+      if (!("Notification" in window)) {
+        showToast("Not supported in this browser.", "error");
+        return;
+      }
+      Notification.requestPermission().then(perm => {
+        if (perm === "granted") {
+          const { pendingCount, overdueCount } = updateNotifications();
+          new Notification("ORO", {
+            body: `${overdueCount} overdue and ${pendingCount} pending items.`
+          });
+          showToast("Alerts enabled.", "success");
+        } else {
+          showToast("Permission denied.", "error");
+        }
+      });
+    }
+
+    // =========================================================================
+    // 11. DASHBOARD CHARTS, YoY TOGGLE & CATEGORY SUMMARY PIVOT TABLE
+    // =========================================================================
+    function resetDashboardFilters() {
+      document.getElementById("dash-year").value = "ALL";
+      document.getElementById("dash-month").value = "ALL";
+      document.getElementById("dash-cat1").value = "ALL";
+      document.getElementById("dash-cat2").value = "ALL";
+      document.getElementById("dash-tag").value = "ALL";
+      renderDashboard();
+    }
+
+    function filterDashboardByPivotRow(dimension, categoryName) {
+      if (dimension === "cat2") {
+        const sel = document.getElementById("dash-cat2");
+        sel.value = sel.value === categoryName ? "ALL" : categoryName;
+      } else {
+        const sel = document.getElementById("dash-cat1");
+        sel.value = sel.value === categoryName ? "ALL" : categoryName;
+      }
+      renderDashboard();
+    }
+
+    function renderDashboard() {
+      const yFilter = document.getElementById("dash-year").value;
+      const mFilter = document.getElementById("dash-month").value;
+      const c1Filter = document.getElementById("dash-cat1").value;
+      const c2Filter = document.getElementById("dash-cat2").value;
+      const tagFilter = document.getElementById("dash-tag").value;
+      const isYoY = document.getElementById("dash-yoy-toggle")?.checked || false;
+      const pieDim = document.getElementById("dash-pie-dimension")?.value || "cat1";
+      const pivotDim = document.getElementById("dash-pivot-dimension")?.value || "cat1";
+      const hideZeroPivot = document.getElementById("dash-pivot-hide-zero")?.checked ?? true;
+
+      const hasActiveFilter = (yFilter !== "ALL" || mFilter !== "ALL" || c1Filter !== "ALL" || c2Filter !== "ALL" || tagFilter !== "ALL");
+      const resetBtn = document.getElementById("btn-dash-reset");
+      if (resetBtn) resetBtn.classList.toggle("hidden", !hasActiveFilter);
+      const resetBtnMobile = document.getElementById("btn-dash-reset-mobile");
+      if (resetBtnMobile) resetBtnMobile.classList.toggle("hidden", !hasActiveFilter);
+
+      const matchesCategoryAndTag = (r) => {
+        if (c1Filter !== "ALL" && r.category !== c1Filter) return false;
+        if (c2Filter !== "ALL" && r.category2 !== c2Filter) return false;
+        if (tagFilter !== "ALL" && !(r.remarks || "").toLowerCase().includes(tagFilter.toLowerCase())) return false;
+        return true;
+      };
+
+      const filtered = records.filter(r => {
+        if (!matchesCategoryAndTag(r)) return false;
+        const rYear = String(r.expenseYear || r.budgetYear || r.incomeYear || "");
+        const rMonth = r.budgetMonth || (r.expenseMonth ? MONTH_SHORT[r.expenseMonth - 1] : "") || (r.incomeMonth ? MONTH_SHORT[r.incomeMonth - 1] : "");
+        if (yFilter !== "ALL" && rYear !== yFilter) return false;
+        if (mFilter !== "ALL" && rMonth !== mFilter) return false;
+        return true;
+      });
+
+      const { pendingCount, overdueCount } = updateNotifications();
+      document.getElementById("d-kpi-pending-count").textContent = pendingCount;
+      document.getElementById("d-kpi-overdue-badge").textContent = `${overdueCount} overdue`;
+
+      const totalBudget = filtered.reduce((s, r) => s + r.budgetAmount, 0);
+      const totalActual = filtered.reduce((s, r) => s + (r.actualAmount || 0), 0);
+      const totalBalance = filtered.reduce((s, r) => s + r.balanceToPay, 0);
+      const totalIncome = filtered.reduce((s, r) => s + r.income, 0);
+      const totalInvest = filtered.reduce((s, r) => s + r.investment, 0);
+
+      const budgetedItems = filtered.filter(r => r.budgetAmount > 0);
+      const compliantItems = budgetedItems.filter(r => r.compliance === "Budgeted");
+      const nonBudgetedCount = filtered.filter(r => r.compliance === "Non Budgeted" && (r.actualAmount || 0) > 0).length;
+      const complianceRate = budgetedItems.length > 0 ? Math.round((compliantItems.length / budgetedItems.length) * 100) : 100;
+
+      document.getElementById("d-kpi-budget").textContent = formatNum(totalBudget);
+      document.getElementById("d-kpi-budget-sub").textContent = `${budgetedItems.length} items`;
+      document.getElementById("d-kpi-actual").textContent = formatNum(totalActual);
+      document.getElementById("d-kpi-actual-sub").textContent = totalBudget > 0 ? `${Math.round((totalActual / totalBudget) * 100)}% of budget` : `${filtered.length} records`;
+      document.getElementById("d-kpi-balance").textContent = formatNum(totalBalance);
+      document.getElementById("d-kpi-balance-sub").textContent = totalBalance < 0 ? "Over budget" : "Remaining";
+      document.getElementById("d-kpi-income").textContent = formatNum(totalIncome);
+      document.getElementById("d-kpi-invest").textContent = `Invested: ${formatNum(totalInvest)}`;
+      document.getElementById("d-kpi-compliance").textContent = `${complianceRate}%`;
+      document.getElementById("d-kpi-nonbudget").textContent = `${nonBudgetedCount} unbudgeted`;
+
+      const isDark = appSettings.theme === "dark";
+      const gridColor = isDark ? "rgba(148,163,184,0.12)" : "rgba(148,163,184,0.2)";
+      const tickColor = isDark ? "#94a3b8" : "#64748b";
+
+      // 1. Trend Line Chart (Standard vs Year-on-Year)
+      const trendCtx = document.getElementById("chart-trend");
+      if (chartInstances.trend) chartInstances.trend.destroy();
+
+      if (isYoY) {
+        document.getElementById("trend-chart-title").textContent = c1Filter !== "ALL" ? `${c1Filter} (YoY)` : "YoY";
+
+        const yoyRecords = records.filter(matchesCategoryAndTag);
+        const yearsSet = new Set();
+        yoyRecords.forEach(r => {
+          const y = String(r.expenseYear || r.budgetYear || "");
+          if (y) yearsSet.add(y);
+        });
+        const sortedYears = [...yearsSet].sort();
+        const yearPalette = ["#6366f1", "#10b981", "#f59e0b", "#0ea5e9", "#8b5cf6", "#14b8a6"];
+
+        const datasets = sortedYears.map((yr, idx) => {
+          const color = yearPalette[idx % yearPalette.length];
+          const monthlyTotals = MONTH_SHORT.map((m, mIdx) => {
+            return yoyRecords
+              .filter(r => {
+                const ry = String(r.expenseYear || r.budgetYear || "");
+                const rm = r.expenseMonth ? MONTH_SHORT[r.expenseMonth - 1] : r.budgetMonth;
+                return ry === yr && rm === m;
+              })
+              .reduce((s, r) => s + (r.actualAmount || 0), 0);
+          });
+          return {
+            label: yr,
+            data: monthlyTotals,
+            borderColor: color,
+            backgroundColor: color,
+            tension: 0.35,
+            borderWidth: 2.5,
+            pointRadius: 3
+          };
+        });
+
+        chartInstances.trend = new Chart(trendCtx, {
+          type: "line",
+          data: { labels: MONTH_SHORT, datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                align: "end",
+                labels: {
+                  color: tickColor,
+                  usePointStyle: true,
+                  pointStyle: "circle",
+                  boxWidth: 6,
+                  boxHeight: 6,
+                  padding: 10,
+                  font: { size: 10, weight: "600" }
+                }
+              }
+            },
+            scales: {
+              x: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11 } } },
+              y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11 } } }
+            }
+          }
+        });
+      } else {
+        document.getElementById("trend-chart-title").textContent = "Trend";
+
+        const monthlyActual = MONTH_SHORT.map((m, idx) =>
+          filtered.filter(r => (r.expenseMonth === idx + 1) || (!r.expenseMonth && r.budgetMonth === m))
+                  .reduce((s, r) => s + (r.actualAmount || 0), 0)
+        );
+        const monthlyBudget = MONTH_SHORT.map(m =>
+          filtered.filter(r => r.budgetMonth === m).reduce((s, r) => s + r.budgetAmount, 0)
+        );
+        const monthlyIncome = MONTH_SHORT.map((m, idx) =>
+          filtered.filter(r => r.incomeMonth === idx + 1).reduce((s, r) => s + r.income, 0)
+        );
+
+        chartInstances.trend = new Chart(trendCtx, {
+          type: "line",
+          data: {
+            labels: MONTH_SHORT,
+            datasets: [
+              { label: "Spent", data: monthlyActual, borderColor: "#6366f1", backgroundColor: "rgba(99,102,241,0.12)", fill: true, tension: 0.35, borderWidth: 2.5, pointRadius: 3 },
+              { label: "Budget", data: monthlyBudget, borderColor: "#94a3b8", borderDash: [5, 5], tension: 0.35, borderWidth: 2, pointRadius: 2 },
+              { label: "Income", data: monthlyIncome, borderColor: "#0ea5e9", tension: 0.35, borderWidth: 2, pointRadius: 2 }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                align: "end",
+                labels: {
+                  color: tickColor,
+                  usePointStyle: true,
+                  pointStyle: "circle",
+                  boxWidth: 6,
+                  boxHeight: 6,
+                  padding: 10,
+                  font: { size: 10, weight: "600" }
+                }
+              }
+            },
+            scales: {
+              x: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11 } } },
+              y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11 } } }
+            }
+          }
+        });
+      }
+
+      // 2. Category / Alt Category Share Pie Chart
+      const pieMap = {};
+      filtered.forEach(r => {
+        const key = (pieDim === "cat2" ? r.category2 : r.category) || "Uncategorized";
+        const val = (r.actualAmount || 0) > 0 ? r.actualAmount : r.budgetAmount;
+        if (val > 0) pieMap[key] = (pieMap[key] || 0) + val;
+      });
+      const pieSorted = Object.entries(pieMap).sort((a, b) => b[1] - a[1]);
+      const palette = ["#6366f1", "#10b981", "#f59e0b", "#0ea5e9", "#8b5cf6", "#14b8a6", "#f97316", "#64748b", "#84cc16", "#3b82f6"];
+
+      const pieCtx = document.getElementById("chart-pie");
+      if (chartInstances.pie) chartInstances.pie.destroy();
+      chartInstances.pie = new Chart(pieCtx, {
+        type: "doughnut",
+        data: {
+          labels: pieSorted.length ? pieSorted.map(x => x[0]) : ["No Data"],
+          datasets: [{
+            data: pieSorted.length ? pieSorted.map(x => x[1]) : [1],
+            backgroundColor: pieSorted.length ? palette : ["#cbd5e1"],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: "62%",
+          plugins: {
+            legend: { position: "right", labels: { color: tickColor, boxWidth: 10, font: { size: 11 } } }
+          }
+        }
+      });
+
+      // 3. Category Summary Pivot Table
+      const pivotKeys = new Set(masterData.categories);
+      filtered.forEach(r => {
+        const k = pivotDim === "cat2" ? r.category2 : r.category;
+        if (k) pivotKeys.add(k);
+      });
+
+      const pivotRows = [...pivotKeys].map(catName => {
+        const rows = filtered.filter(r => (pivotDim === "cat2" ? (r.category2 || "Uncategorized") : (r.category || "Uncategorized")) === catName);
+        const bud = rows.reduce((s, r) => s + r.budgetAmount, 0);
+        const act = rows.reduce((s, r) => s + (r.actualAmount || 0), 0);
+        const bal = rows.reduce((s, r) => s + r.balanceToPay, 0);
+        const inc = rows.reduce((s, r) => s + r.income, 0);
+        const inv = rows.reduce((s, r) => s + r.investment, 0);
+        return { catName, bud, act, bal, inc, inv, count: rows.length };
+      }).filter(item => {
+        if (!hideZeroPivot) return true;
+        return item.bud !== 0 || item.act !== 0 || item.inc !== 0 || item.inv !== 0;
+      }).sort((a, b) => (b.act - a.act) || (b.bud - a.bud) || a.catName.localeCompare(b.catName));
+
+      const pivotTbody = document.getElementById("dash-pivot-tbody");
+      const pivotTfoot = document.getElementById("dash-pivot-tfoot");
+
+      if (pivotRows.length === 0) {
+        pivotTbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-slate-400">No data.</td></tr>`;
+        pivotTfoot.innerHTML = "";
+      } else {
+        pivotTbody.innerHTML = pivotRows.map(row => {
+          const sharePct = totalActual > 0 ? ((row.act / totalActual) * 100).toFixed(1) : "0.0";
+          const isSelected = (pivotDim === "cat2" ? c2Filter : c1Filter) === row.catName;
+          return `
+            <tr onclick="filterDashboardByPivotRow('${pivotDim}', '${escapeHtml(row.catName).replace(/'/g, "\\'")}')"
+              class="hover:bg-indigo-50/60 dark:hover:bg-slate-800/70 transition-colors cursor-pointer ${isSelected ? "bg-indigo-50 dark:bg-indigo-950/50 font-bold" : ""}">
+              <td class="py-2.5 px-4 font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <span>${escapeHtml(row.catName)}</span>
+                ${isSelected ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-600 text-white">Active</span>` : ""}
+              </td>
+              <td class="py-2.5 px-4 text-right tabular-nums text-slate-700 dark:text-slate-300">${formatNum(row.bud)}</td>
+              <td class="py-2.5 px-4 text-right tabular-nums font-bold text-indigo-600 dark:text-indigo-400">${formatNum(row.act)}</td>
+              <td class="py-2.5 px-4 text-right tabular-nums font-bold ${row.bal < 0 ? "text-rose-600" : "text-emerald-600 dark:text-emerald-400"}">${formatNum(row.bal)}</td>
+              <td class="py-2.5 px-4 text-right tabular-nums text-sky-600 dark:text-sky-400">${row.inc > 0 ? formatNum(row.inc) : "—"}</td>
+              <td class="py-2.5 px-4 text-right tabular-nums text-emerald-600 dark:text-emerald-400">${row.inv > 0 ? formatNum(row.inv) : "—"}</td>
+              <td class="py-2.5 px-4 text-right tabular-nums text-slate-500">${sharePct}%</td>
+              <td class="py-2.5 px-4 text-center tabular-nums text-slate-500">${row.count}</td>
+            </tr>
+          `;
+        }).join("");
+
+        pivotTfoot.innerHTML = `
+          <tr>
+            <td class="py-3 px-4">Total (${pivotRows.length})</td>
+            <td class="py-3 px-4 text-right tabular-nums">${formatNum(totalBudget)}</td>
+            <td class="py-3 px-4 text-right tabular-nums text-indigo-600 dark:text-indigo-400">${formatNum(totalActual)}</td>
+            <td class="py-3 px-4 text-right tabular-nums ${totalBalance < 0 ? "text-rose-600" : "text-emerald-600 dark:text-emerald-400"}">${formatNum(totalBalance)}</td>
+            <td class="py-3 px-4 text-right tabular-nums text-sky-600 dark:text-sky-400">${formatNum(totalIncome)}</td>
+            <td class="py-3 px-4 text-right tabular-nums text-emerald-600 dark:text-emerald-400">${formatNum(totalInvest)}</td>
+            <td class="py-3 px-4 text-right tabular-nums">100%</td>
+            <td class="py-3 px-4 text-center tabular-nums">${filtered.length}</td>
+          </tr>
+        `;
+      }
+
+      // 4. Budget vs Spent Bar Chart
+      const topCats = pivotRows.slice(0, 8).map(r => r.catName);
+      const barCtx = document.getElementById("chart-bar");
+      if (chartInstances.bar) chartInstances.bar.destroy();
+      chartInstances.bar = new Chart(barCtx, {
+        type: "bar",
+        data: {
+          labels: topCats,
+          datasets: [
+            { label: "Budget", data: topCats.map(c => pivotRows.find(r => r.catName === c)?.bud || 0), backgroundColor: "#cbd5e1", borderRadius: 6 },
+            { label: "Spent", data: topCats.map(c => pivotRows.find(r => r.catName === c)?.act || 0), backgroundColor: "#6366f1", borderRadius: 6 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: tickColor, font: { size: 11 } } } },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: tickColor, font: { size: 11 } } },
+            y: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11 } } }
+          }
+        }
+      });
+    }
+
+    // =========================================================================
+    // 12. 27-COLUMN LEDGER TABLE
+    // =========================================================================
+    function applyLedgerFilters() {
+      const fy = document.getElementById("filter-year").value;
+      const fm = document.getElementById("filter-month").value;
+      const fc = document.getElementById("filter-category").value;
+      const fp = document.getElementById("filter-payment").value;
+      const ft = document.getElementById("filter-tag").value;
+      const fs = document.getElementById("filter-search").value.trim().toLowerCase();
+
+      const filtered = records.filter(r => {
+        const y = String(r.budgetYear || r.expenseYear || "");
+        const m = r.budgetMonth || (r.expenseMonth ? MONTH_SHORT[r.expenseMonth - 1] : "");
+        if (fy !== "ALL" && y !== fy) return false;
+        if (fm !== "ALL" && m !== fm) return false;
+        if (fc !== "ALL" && r.category !== fc && r.category2 !== fc) return false;
+        if (fp !== "ALL" && r.payment !== fp) return false;
+        if (ft !== "ALL" && !(r.remarks || "").toLowerCase().includes(ft.toLowerCase())) return false;
+        if (fs && !`${r.task} ${r.category} ${r.category2} ${r.remarks}`.toLowerCase().includes(fs)) return false;
+        return true;
+      });
+
+      const tbody = document.getElementById("ledger-tbody");
+      const emptyEl = document.getElementById("ledger-empty");
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = "";
+        emptyEl.classList.remove("hidden");
+        return;
+      }
+      emptyEl.classList.add("hidden");
+
+      tbody.innerHTML = filtered.map(r => {
+        const payBadge = r.payment === "Paid"
+          ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">Paid</span>`
+          : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">Pending</span>`;
+
+        const compBadge = r.compliance === "Budgeted"
+          ? `<span class="text-emerald-600 dark:text-emerald-400 font-bold">Budgeted</span>`
+          : `<span class="text-rose-600 dark:text-rose-400 font-bold">Non Budgeted</span>`;
+
+        return `
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+            <td class="py-2.5 px-3 text-slate-600 dark:text-slate-400">${r.actualDate || "—"}</td>
+            <td class="py-2.5 px-3 font-bold text-slate-900 dark:text-white sticky-col-task bg-white dark:bg-slate-900">${escapeHtml(r.task)}</td>
+            <td class="py-2.5 px-3">${escapeHtml(r.category)}</td>
+            <td class="py-2.5 px-3 text-slate-500">${escapeHtml(r.category2)}</td>
+            <td class="py-2.5 px-3 text-right font-bold tabular-nums">${r.actualAmount !== null ? formatNum(r.actualAmount) : "—"}</td>
+            <td class="py-2.5 px-3 text-right font-bold tabular-nums ${r.balanceToPay < 0 ? "text-rose-600" : ""}">${formatNum(r.balanceToPay)}</td>
+            <td class="py-2.5 px-3 text-right tabular-nums text-sky-600">${r.income ? formatNum(r.income) : "0.00"}</td>
+            <td class="py-2.5 px-3 text-right tabular-nums text-emerald-600">${r.investment ? formatNum(r.investment) : "0.00"}</td>
+            <td class="py-2.5 px-3 text-right tabular-nums">${r.usd ? formatNum(r.usd) : "0.00"}</td>
+            <td class="py-2.5 px-3 text-right tabular-nums">${r.gbp ? formatNum(r.gbp) : "0.00"}</td>
+            <td class="py-2.5 px-3 text-slate-600 dark:text-slate-400">${r.budgetedDate || "—"}</td>
+            <td class="py-2.5 px-3 text-right font-semibold tabular-nums">${formatNum(r.budgetAmount)}</td>
+            <td class="py-2.5 px-3">${escapeHtml(r.recurring)}</td>
+            <td class="py-2.5 px-3">${escapeHtml(r.frequency) || "—"}</td>
+            <td class="py-2.5 px-3">${r.fromDate || "—"}</td>
+            <td class="py-2.5 px-3">${r.toDate || "—"}</td>
+            <td class="py-2.5 px-3">${compBadge}</td>
+            <td class="py-2.5 px-3">${payBadge}</td>
+            <td class="py-2.5 px-3 text-center">${r.incomeYear || "—"}</td>
+            <td class="py-2.5 px-3 text-center">${r.incomeMonth || "—"}</td>
+            <td class="py-2.5 px-3 text-center">${r.investmentYear || "—"}</td>
+            <td class="py-2.5 px-3 text-center">${r.investmentMonth || "—"}</td>
+            <td class="py-2.5 px-3 text-center">${r.budgetYear || "—"}</td>
+            <td class="py-2.5 px-3 text-center">${r.budgetMonth || "—"}</td>
+            <td class="py-2.5 px-3 text-center">${r.expenseYear || "—"}</td>
+            <td class="py-2.5 px-3 text-center">${r.expenseMonth || "—"}</td>
+            <td class="py-2.5 px-3 text-slate-500 max-w-[180px] truncate">${escapeHtml(r.remarks) || "—"}</td>
+            <td class="py-2.5 px-3 text-right">
+              <div class="inline-flex gap-1">
+                <button type="button" onclick="openActualizeModal('${r.id}')" class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-xs font-bold cursor-pointer">Edit</button>
+                <button type="button" onclick="deleteRecord('${r.id}')" class="px-2 py-1 rounded bg-rose-50 dark:bg-rose-950 text-rose-600 text-xs font-bold cursor-pointer">Del</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function deleteRecord(id) {
+      records = records.filter(r => r.id !== id);
+      if (!deletedRecordIds.includes(id)) {
+        deletedRecordIds.push(id);
+        localStorage.setItem(STORAGE_CLOUD_DELETED_KEY, JSON.stringify(deletedRecordIds));
+      }
+      saveState();
+      refreshAllViews();
+      showToast("Deleted.", "info");
+    }
+
+    // =========================================================================
+    // 13. MASTER DATA & SETTINGS
+    // =========================================================================
+    function populateMasterDropdowns() {
+      const catOptions = masterData.categories.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+
+      const dashCat1 = document.getElementById("dash-cat1");
+      if (dashCat1) dashCat1.innerHTML = `<option value="ALL">All Categories</option>` + catOptions;
+
+      const dashCat2 = document.getElementById("dash-cat2");
+      if (dashCat2) dashCat2.innerHTML = `<option value="ALL">All Alt Categories</option>` + catOptions;
+
+      const filterCat = document.getElementById("filter-category");
+      if (filterCat) filterCat.innerHTML = `<option value="ALL">All Categories</option>` + catOptions;
+
+      const recOptions = masterData.recurringOptions.map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join("");
+      const pbRec = document.getElementById("pb-recurring");
+      if (pbRec) pbRec.innerHTML = recOptions;
+
+      const freqOptions = masterData.frequencies.map(f => `<option value="${escapeHtml(f)}">${escapeHtml(f)}</option>`).join("");
+      const pbFreq = document.getElementById("pb-frequency");
+      if (pbFreq) pbFreq.innerHTML = freqOptions;
+    }
+
+    function renderMasterLists() {
+      document.getElementById("master-cat-count").textContent = masterData.categories.length;
+      document.getElementById("master-categories-list").innerHTML = masterData.categories.map((item, idx) => `
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold">
+          ${escapeHtml(item)}
+          <button type="button" onclick="removeMasterItem('categories', ${idx})" class="text-slate-400 hover:text-rose-600 cursor-pointer">&times;</button>
+        </span>
+      `).join("");
+
+      document.getElementById("master-recurring-list").innerHTML = masterData.recurringOptions.map((item, idx) => `
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-xs font-semibold">
+          ${escapeHtml(item)}
+          <button type="button" onclick="removeMasterItem('recurringOptions', ${idx})" class="hover:text-rose-600 cursor-pointer">&times;</button>
+        </span>
+      `).join("");
+
+      document.getElementById("master-frequencies-list").innerHTML = masterData.frequencies.map((item, idx) => `
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-semibold">
+          ${escapeHtml(item)}
+          <button type="button" onclick="removeMasterItem('frequencies', ${idx})" class="hover:text-rose-600 cursor-pointer">&times;</button>
+        </span>
+      `).join("");
+    }
+
+    function addMasterItem(e, listKey, inputId) {
+      e.preventDefault();
+      const input = document.getElementById(inputId);
+      const val = input.value.trim();
+      if (!val || masterData[listKey].includes(val)) return;
+      masterData[listKey].push(val);
+      if (listKey === "categories") masterData[listKey].sort();
+      input.value = "";
+      saveMasterState();
+      populateMasterDropdowns();
+      renderMasterLists();
+      showToast(`Added "${val}".`, "success");
+    }
+
+    function removeMasterItem(listKey, idx) {
+      if (masterData[listKey].length <= 1) return;
+      masterData[listKey].splice(idx, 1);
+      saveMasterState();
+      populateMasterDropdowns();
+      renderMasterLists();
+    }
+
+    function resetMasterDataToDefaults() {
+      masterData = JSON.parse(JSON.stringify(DEFAULT_MASTER));
+      saveMasterState();
+      populateMasterDropdowns();
+      renderMasterLists();
+      showToast("Master reset.", "info");
+    }
+
+    function saveSettings() {
+      appSettings.defaultLanding = document.getElementById("setting-default-landing").value;
+      appSettings.currency = document.getElementById("setting-currency").value.trim() || "LKR";
+      localStorage.setItem(STORAGE_SETTINGS_KEY, JSON.stringify(appSettings));
+      showToast("Saved.", "success");
+    }
+
+    // =========================================================================
+    // 14. CSV / JSON PORTABILITY & PERSISTENCE
+    // =========================================================================
+    function exportToExcelCSV() {
+      const rows = [EXCEL_27_HEADERS];
+      records.forEach(r => {
+        rows.push([
+          r.actualDate, r.task, r.category, r.category2,
+          r.actualAmount !== null ? r.actualAmount : "",
+          r.balanceToPay, r.income || "", r.investment || "", r.usd || "", r.gbp || "",
+          r.budgetedDate, r.budgetAmount, r.recurring, r.frequency, r.fromDate, r.toDate,
+          r.compliance, r.payment, r.incomeYear, r.incomeMonth,
+          r.investmentYear, r.investmentMonth, r.budgetYear, r.budgetMonth,
+          r.expenseYear, r.expenseMonth, r.remarks
+        ]);
+      });
+
+      const csvContent = rows.map(row =>
+        row.map(cell => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(",")
+      ).join("\n");
+
+      triggerDownload(csvContent, `ORO_Export_${toISODateString(new Date())}.csv`, "text/csv;charset=utf-8;");
+      showToast("CSV exported.", "success");
+    }
+
+    function importFromExcelCSV(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const lines = e.target.result.split(/\r?\n/).filter(l => l.trim());
+        if (lines.length < 2) return;
+        const imported = [];
+        for (let i = 1; i < lines.length; i++) {
+          const cols = parseCSVLine(lines[i]);
+          if (!cols[1] && !cols[11] && !cols[4]) continue;
+          const cleanNum = (v) => (v && v.trim() !== "") ? Number(v.replace(/,/g, "")) : null;
+          imported.push(computeRowFormulas({
+            actualDate: cols[0] || "",
+            task: cols[1] || "Imported",
+            category: cols[2] || masterData.categories[0],
+            category2: cols[3] || cols[2] || masterData.categories[0],
+            actualAmount: cleanNum(cols[4]),
+            income: cleanNum(cols[6]) || 0,
+            investment: cleanNum(cols[7]) || 0,
+            usd: cleanNum(cols[8]) || 0,
+            gbp: cleanNum(cols[9]) || 0,
+            budgetedDate: cols[10] || "",
+            budgetAmount: cleanNum(cols[11]) || 0,
+            recurring: cols[12] !== undefined ? cols[12] : "No",
+            frequency: cols[13] || "",
+            fromDate: cols[14] || "",
+            toDate: cols[15] || "",
+            remarks: cols[26] || ""
+          }));
+        }
+        records = [...records, ...imported];
+        saveState();
+        refreshAllViews();
+        showToast(`Imported ${imported.length} rows.`, "success");
+      };
+      reader.readAsText(file);
+    }
+
+    function exportJSONBackup() {
+      const payload = JSON.stringify({ records, masterData, appSettings }, null, 2);
+      triggerDownload(payload, `ORO_Backup_${toISODateString(new Date())}.json`, "application/json");
+      showToast("JSON saved.", "success");
+    }
+
+    function importJSONBackup(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (Array.isArray(parsed.records)) records = parsed.records.map(computeRowFormulas);
+          if (parsed.masterData) masterData = parsed.masterData;
+          saveState();
+          saveMasterState();
+          populateMasterDropdowns();
+          renderMasterLists();
+          refreshAllViews();
+          showToast("Backup restored.", "success");
+        } catch {
+          showToast("Invalid JSON.", "error");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function loadState() {
+      const savedMaster = localStorage.getItem(STORAGE_MASTER_KEY);
+      if (savedMaster) {
+        try { masterData = JSON.parse(savedMaster); } catch {}
+      }
+
+      document.getElementById("setting-default-landing").value = appSettings.defaultLanding || "dashboard";
+      document.getElementById("setting-currency").value = appSettings.currency || "LKR";
+
+      const savedRecs = localStorage.getItem(STORAGE_RECORDS_KEY);
+      if (savedRecs) {
+        try {
+          records = JSON.parse(savedRecs).map(computeRowFormulas);
+          return;
+        } catch {}
+      }
+      loadSampleDataset(true);
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_RECORDS_KEY, JSON.stringify(records));
+      scheduleCloudPush();
+    }
+
+    function saveMasterState() {
+      localStorage.setItem(STORAGE_MASTER_KEY, JSON.stringify(masterData));
+    }
+
+    function loadSampleDataset(silent = false) {
+      const today = new Date();
+      const y = today.getFullYear();
+      const m = String(today.getMonth() + 1).padStart(2, "0");
+      const prevM = String(today.getMonth() === 0 ? 12 : today.getMonth()).padStart(2, "0");
+      const prevY = today.getMonth() === 0 ? y - 1 : y;
+
+      records = [
+        computeRowFormulas({ actualDate: `${y}-${m}-01`, task: "Monthly Salary", category: "Employment", category2: "Employment", income: 245000, budgetAmount: 0, recurring: "No", remarks: "Primary salary" }),
+        computeRowFormulas({ actualDate: `${y}-${m}-03`, task: "Supermarket Groceries", category: "Groceries", category2: "Family", actualAmount: 18450, budgetedDate: `${y}-${m}-05`, budgetAmount: 20000, recurring: "No", remarks: "Weekly supplies" }),
+        computeRowFormulas({ actualDate: "", task: "Home Loan Installment", category: "Loans", category2: "House Construction", actualAmount: null, budgetedDate: `${y}-${m}-05`, budgetAmount: 48500, recurring: "Processed", frequency: "Monthly", fromDate: `${y}-${m}-05`, toDate: `${y + 1}-${m}-05`, remarks: "Bank auto-debit" }),
+        computeRowFormulas({ actualDate: "", task: "Electricity & Fiber", category: "Utilities", category2: "Family", actualAmount: null, budgetedDate: `${y}-${m}-25`, budgetAmount: 14500, recurring: "No", remarks: "Monthly bill" }),
+        computeRowFormulas({ actualDate: `${y}-${m}-06`, task: "Unit Trust SIP", category: "Investments", category2: "Investments", actualAmount: 25000, investment: 25000, budgetedDate: `${y}-${m}-06`, budgetAmount: 25000, recurring: "No", remarks: "Wealth building" }),
+        computeRowFormulas({ actualDate: `${y}-${m}-08`, task: "Cloud Hosting", category: "Digital Subscriptions", category2: "Side Hustles", actualAmount: 4650, usd: 15, budgetAmount: 0, recurring: "No", remarks: "USD card" }),
+        computeRowFormulas({ actualDate: `${prevY}-${prevM}-14`, task: "Fuel & Highway Toll", category: "Transport", category2: "Vehicle", actualAmount: 12200, budgetedDate: `${prevY}-${prevM}-15`, budgetAmount: 12000, recurring: "No", remarks: "#KandyTrip" }),
+        computeRowFormulas({ actualDate: `${y - 1}-${m}-12`, task: "Prior Year Groceries", category: "Groceries", category2: "Family", actualAmount: 16200, budgetedDate: `${y - 1}-${m}-12`, budgetAmount: 16000, recurring: "No", remarks: "Last year comparison" })
+      ];
+      saveState();
+      refreshAllViews();
+      if (!silent) showToast("Sample loaded.", "info");
+    }
+
+    function confirmClearAllData() {
+      records.forEach(r => {
+        if (r.id && !deletedRecordIds.includes(r.id)) deletedRecordIds.push(r.id);
+      });
+      localStorage.setItem(STORAGE_CLOUD_DELETED_KEY, JSON.stringify(deletedRecordIds));
+      records = [];
+      saveState();
+      refreshAllViews();
+      showToast("All records cleared.", "info");
+    }
+
+    // =========================================================================
+    // 14B. SUPABASE 1-USER CLOUD SYNC & OFFLINE QUEUE
+    // =========================================================================
+    function updateCloudUI(connected, email = "", statusText = "") {
+      const badge = document.getElementById("cloud-status-badge");
+      const setupForm = document.getElementById("cloud-setup-form");
+      const connectedBar = document.getElementById("cloud-connected-bar");
+      const emailEl = document.getElementById("cloud-user-email");
+      if (!badge) return;
+
+      if (connected) {
+        badge.textContent = statusText || "Connected";
+        badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300";
+        if (setupForm) setupForm.classList.add("hidden");
+        if (connectedBar) connectedBar.classList.remove("hidden");
+        if (emailEl) emailEl.textContent = email;
+      } else {
+        badge.textContent = statusText || "Offline Only";
+        badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300";
+        if (setupForm) setupForm.classList.remove("hidden");
+        if (connectedBar) connectedBar.classList.add("hidden");
+      }
+    }
+
+    async function initSupabaseCloud() {
+      try {
+        deletedRecordIds = JSON.parse(localStorage.getItem(STORAGE_CLOUD_DELETED_KEY) || "[]");
+      } catch { deletedRecordIds = []; }
+
+      const rawCfg = localStorage.getItem(STORAGE_CLOUD_CFG_KEY);
+      if (!rawCfg || !window.supabase) return;
+
+      try {
+        const cfg = JSON.parse(rawCfg);
+        if (!cfg.url || !cfg.key) return;
+        const urlEl = document.getElementById("sb-url");
+        const keyEl = document.getElementById("sb-key");
+        if (urlEl) urlEl.value = cfg.url;
+        if (keyEl) keyEl.value = cfg.key;
+
+        supabaseClient = window.supabase.createClient(cfg.url, cfg.key);
+        const { data } = await supabaseClient.auth.getSession();
+        if (data?.session?.user) {
+          supabaseUser = data.session.user;
+          updateCloudUI(true, supabaseUser.email, "Synced");
+          await syncCloudNow(false);
+        }
+      } catch (err) {
+        console.warn("Supabase init skipped:", err);
+      }
+
+      window.addEventListener("online", () => {
+        if (supabaseClient && supabaseUser) syncCloudNow(false);
+      });
+    }
+
+    async function connectAndSignInSupabase() {
+      const url = (document.getElementById("sb-url")?.value || "").trim().replace(/\/+$/, "");
+      const key = (document.getElementById("sb-key")?.value || "").trim();
+      const email = (document.getElementById("sb-email")?.value || "").trim();
+      const password = document.getElementById("sb-password")?.value || "";
+
+      if (!url || !key || !email || !password) {
+        showToast("Fill in URL, Key, Email, and Password.", "error");
+        return;
+      }
+      if (!window.supabase) {
+        showToast("Supabase library offline.", "error");
+        return;
+      }
+
+      try {
+        updateCloudUI(false, "", "Connecting...");
+        supabaseClient = window.supabase.createClient(url, key);
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) {
+          updateCloudUI(false, "", "Auth Failed");
+          showToast(error.message || "Sign in failed.", "error");
+          return;
+        }
+
+        localStorage.setItem(STORAGE_CLOUD_CFG_KEY, JSON.stringify({ url, key }));
+        supabaseUser = data.user;
+        document.getElementById("sb-password").value = "";
+        updateCloudUI(true, supabaseUser.email, "Syncing...");
+        await syncCloudNow(true);
+      } catch (err) {
+        updateCloudUI(false, "", "Error");
+        showToast("Connection failed.", "error");
+      }
+    }
+
+    function scheduleCloudPush() {
+      if (!supabaseClient || !supabaseUser) return;
+      clearTimeout(cloudSyncTimer);
+      cloudSyncTimer = setTimeout(() => {
+        syncCloudNow(false);
+      }, 900);
+    }
+
+    async function syncCloudNow(notify = false) {
+      if (!supabaseClient || !supabaseUser) return;
+      if (!navigator.onLine) {
+        updateCloudUI(true, supabaseUser.email, "Offline (Queued)");
+        return;
+      }
+
+      try {
+        updateCloudUI(true, supabaseUser.email, "Syncing...");
+
+        // 1. Delete any records removed locally while offline
+        if (deletedRecordIds.length > 0) {
+          const { error: delErr } = await supabaseClient
+            .from("oro_records")
+            .delete()
+            .eq("user_id", supabaseUser.id)
+            .in("id", deletedRecordIds);
+          if (!delErr) {
+            deletedRecordIds = [];
+            localStorage.setItem(STORAGE_CLOUD_DELETED_KEY, "[]");
+          }
+        }
+
+        // 2. Push local records up to Supabase
+        if (records.length > 0) {
+          const rowsToUpsert = records.map(r => ({
+            id: r.id,
+            user_id: supabaseUser.id,
+            payload: r,
+            updated_at: new Date().toISOString()
+          }));
+          const { error: upErr } = await supabaseClient
+            .from("oro_records")
+            .upsert(rowsToUpsert, { onConflict: "user_id,id" });
+          if (upErr) throw upErr;
+        }
+
+        // 3. Pull all cloud records down and merge
+        const { data: cloudRows, error: fetchErr } = await supabaseClient
+          .from("oro_records")
+          .select("id, payload")
+          .eq("user_id", supabaseUser.id);
+        if (fetchErr) throw fetchErr;
+
+        if (Array.isArray(cloudRows) && cloudRows.length > 0) {
+          const mergedMap = new Map();
+          records.forEach(r => mergedMap.set(r.id, r));
+          cloudRows.forEach(row => {
+            if (row.payload && !deletedRecordIds.includes(row.id)) {
+              mergedMap.set(row.id, computeRowFormulas(row.payload));
+            }
+          });
+          records = [...mergedMap.values()];
+          localStorage.setItem(STORAGE_RECORDS_KEY, JSON.stringify(records));
+          refreshAllViews();
+        }
+
+        const timeLabel = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        const lastSyncEl = document.getElementById("cloud-last-sync");
+        if (lastSyncEl) lastSyncEl.textContent = `Last synced ${timeLabel}`;
+        updateCloudUI(true, supabaseUser.email, "Synced");
+        if (notify) showToast("Cloud sync complete.", "success");
+      } catch (err) {
+        updateCloudUI(true, supabaseUser.email, "Sync Pending");
+        if (notify) showToast(err.message || "Sync failed.", "error");
+      }
+    }
+
+    async function signOutSupabase() {
+      if (supabaseClient) {
+        try { await supabaseClient.auth.signOut(); } catch {}
+      }
+      supabaseUser = null;
+      updateCloudUI(false, "", "Offline Only");
+      showToast("Signed out.", "info");
+    }
+
+    function refreshAllViews() {
+      syncYearDropdowns();
+      refreshTaskSuggestions();
+      syncTagFilters();
+      updateNotifications();
+      updateHomeStats();
+      renderEntryBudgetList();
+      if (document.getElementById("page-dashboard").classList.contains("active")) renderDashboard();
+      if (document.getElementById("page-ledger").classList.contains("active")) applyLedgerFilters();
+    }
+
+    function updateHomeStats() {
+      const pending = records.filter(r => r.payment === "Pending" && r.budgetAmount > 0).length;
+      const spent = records.reduce((s, r) => s + (r.actualAmount || 0), 0);
+      document.getElementById("home-stat-records").textContent = records.length;
+      document.getElementById("home-stat-pending").textContent = pending;
+      document.getElementById("home-stat-actual").textContent = formatNum(spent);
+    }
+
+    // =========================================================================
+    // 15. UTILITIES & PWA MANIFEST
+    // =========================================================================
+    function generateId() {
+      return "rec_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
+    }
+
+    function parseISODate(str) {
+      if (!str || typeof str !== "string") return null;
+      const parts = str.split("-");
+      if (parts.length !== 3) return null;
+      const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    function toISODateString(d) {
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    }
+
+    function formatNum(num) {
+      return Number(num || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function parseCSVLine(line) {
+      const res = [];
+      let cur = "";
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') {
+          if (inQuotes && line[i + 1] === '"') { cur += '"'; i++; }
+          else { inQuotes = !inQuotes; }
+        } else if (ch === "," && !inQuotes) {
+          res.push(cur);
+          cur = "";
+        } else {
+          cur += ch;
+        }
+      }
+      res.push(cur);
+      return res;
+    }
+
+    function triggerDownload(content, filename, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function showToast(msg, type = "info") {
+      const container = document.getElementById("toast-container");
+      const toast = document.createElement("div");
+      const bg = type === "success" ? "bg-emerald-600" : type === "error" ? "bg-rose-600" : "bg-slate-900";
+      toast.className = `${bg} text-white px-4 py-2.5 rounded-2xl shadow-lg text-xs font-bold flex items-center gap-2 transition-all`;
+      toast.textContent = msg;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        setTimeout(() => toast.remove(), 250);
+      }, 2600);
+    }
+
+    function registerPWA() {
+      const manifest = {
+        name: "ORO — The Money Tracker",
+        short_name: "ORO",
+        start_url: ".",
+        display: "standalone",
+        background_color: "#f8fafc",
+        theme_color: "#0f172a"
+      };
+      const blob = new Blob([JSON.stringify(manifest)], { type: "application/json" });
+      document.getElementById("pwa-manifest").setAttribute("href", URL.createObjectURL(blob));
+    }
+  </script>
+</body>
+</html>
