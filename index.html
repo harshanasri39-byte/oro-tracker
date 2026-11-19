@@ -2753,8 +2753,6 @@
 
       const filtered = getFilteredDashboardRecords();
       const todayISO = getTodayISO();
-      const currentYearStr = String(new Date().getFullYear());
-      const currentMonthStr = MONTHS_SHORT[new Date().getMonth()];
 
       let totalBudget = 0;
       let totalSpent = 0;
@@ -2765,7 +2763,6 @@
       let budgetedActualExpenseCount = 0;
       let pendingAsAtTodayCount = 0;
       let overdueAsAtTodayCount = 0;
-      let currentMonthPendingBudgetCount = 0;
 
       filtered.forEach(r => {
         const b = r.budgetAmount || 0;
@@ -2790,10 +2787,6 @@
           pendingAsAtTodayCount++;
           if (isRecordOverdue(r)) overdueAsAtTodayCount++;
         }
-
-        if (r.payment === "Pending" && b > 0 && r.budgetYear === currentYearStr && r.budgetMonth === currentMonthStr) {
-          currentMonthPendingBudgetCount++;
-        }
       });
 
       const balance = totalBudget - totalSpent;
@@ -2811,7 +2804,7 @@
       document.getElementById("d-kpi-nonbudget").textContent = `${budgetedActualExpenseCount} / ${totalActualExpenseCount} budgeted`;
       document.getElementById("d-kpi-income").textContent = formatMoney(totalIncome);
       document.getElementById("d-kpi-invest").textContent = `Invested: ${formatMoney(totalInvest)}`;
-      document.getElementById("d-kpi-pending-count").textContent = currentMonthPendingBudgetCount;
+      document.getElementById("d-kpi-pending-count").textContent = getCurrentMonthPendingBudgetCount();
       const ovBadge = document.getElementById("d-kpi-overdue-badge");
       if (ovBadge) {
         ovBadge.textContent = `${overdueAsAtTodayCount} overdue`;
@@ -3696,17 +3689,21 @@
     /* ===================================================================== */
     /* NOTIFICATIONS & OVERVIEW STATS                                        */
     /* ===================================================================== */
-    function updateNotificationBadges() {
-      const overdue = records.filter(r => isRecordOverdue(r));
+    function getCurrentMonthPendingBudgetCount() {
       const now = new Date();
       const curYear = String(now.getFullYear());
       const curMonth = MONTHS_SHORT[now.getMonth()];
-      const currentMonthPendingCount = records.filter(r =>
+      return records.filter(r =>
         r.payment === "Pending" &&
         (r.budgetAmount || 0) > 0 &&
         r.budgetYear === curYear &&
         r.budgetMonth === curMonth
       ).length;
+    }
+
+    function updateNotificationBadges() {
+      const overdue = records.filter(r => isRecordOverdue(r));
+      const currentMonthPendingCount = getCurrentMonthPendingBudgetCount();
       const badge = document.getElementById("notif-badge");
       const pill = document.getElementById("subtab-pending-pill");
       if (badge) {
