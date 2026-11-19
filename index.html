@@ -197,18 +197,18 @@
               <div>
                 <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Date *</label>
                 <input type="date" id="qa-actual-date" required
-                  class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-3 text-sm font-semibold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all" />
+                  class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-3 text-sm font-semibold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-emerald-500 outline-none" />
               </div>
 
               <div>
                 <div class="flex items-center justify-between mb-1.5">
-                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400">Amount</label>
+                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400">Amount *</label>
                   <span id="calc-preview-qa-actual-amount" class="hidden text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/80 px-2 py-0.5 rounded-full"></span>
                 </div>
                 <input type="text" id="qa-actual-amount" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true"
                   onblur="commitMathInput(this)"
                   oninput="previewMathInput(this)" onkeydown="handleMathKeydown(event, this)"
-                  class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-3 text-lg font-extrabold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all tabular-nums" />
+                  class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-3 text-base font-extrabold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-emerald-500 outline-none tabular-nums" />
               </div>
             </div>
 
@@ -217,16 +217,14 @@
               <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Description *</label>
               <div class="relative">
                 <input type="text" id="qa-task" required autocomplete="off"
-                  onfocus="openTaskDropdown('qa-task')"
-                  oninput="filterTaskDropdown('qa-task'); handleTaskAutoMatch(this.value)"
-                  onchange="handleTaskAutoMatch(this.value)"
+                  oninput="filterTaskDropdown('qa-task')"
                   onkeydown="handleTaskKeydown(event, 'qa-task')"
-                  class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-sm font-semibold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all" />
-                <div id="qa-task-dropdown" class="cat-combo-menu hidden absolute z-30 left-0 right-0 mt-1 max-h-48 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg py-1"></div>
+                  class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-sm font-semibold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-emerald-500 outline-none" />
+                <div id="qa-task-dropdown" class="cat-combo-menu hidden absolute z-30 left-0 right-0 mt-1.5 max-h-52 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl py-1"></div>
               </div>
             </div>
 
-            <!-- Category & Alt Category -->
+            <!-- Category & Alt Category (Searchable Comboboxes) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Category *</label>
@@ -236,13 +234,14 @@
                     oninput="filterCategoryDropdown('qa-cat1'); mirrorCategoryToAlt('qa-cat1', 'qa-cat2')"
                     onkeydown="handleCategoryKeydown(event, 'qa-cat1', 'qa-cat2')"
                     class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 pl-3.5 pr-9 py-3 text-sm font-semibold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-emerald-500 outline-none" />
-                  <button type="button" tabindex="-1" onclick="toggleCategoryDropdown('qa-cat1')"
+                  <button type="button" tabindex="-1" onclick="toggleCategoryDropdown('qa-cat1')" aria-label="Show Categories"
                     class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer">
                     <i data-lucide="chevron-down" class="w-4 h-4"></i>
                   </button>
-                  <div id="qa-cat1-dropdown" class="cat-combo-menu hidden absolute z-30 left-0 right-0 mt-1 max-h-48 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg py-1"></div>
+                  <div id="qa-cat1-dropdown" class="cat-combo-menu hidden absolute z-30 left-0 right-0 mt-1.5 max-h-52 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl py-1"></div>
                 </div>
               </div>
+
               <div>
                 <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Alt Category</label>
                 <div class="relative">
@@ -251,99 +250,73 @@
                     oninput="this.dataset.customized = 'true'; filterCategoryDropdown('qa-cat2')"
                     onkeydown="handleCategoryKeydown(event, 'qa-cat2')"
                     class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 pl-3.5 pr-9 py-3 text-sm font-semibold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-emerald-500 outline-none" />
-                  <button type="button" tabindex="-1" onclick="toggleCategoryDropdown('qa-cat2')"
+                  <button type="button" tabindex="-1" onclick="toggleCategoryDropdown('qa-cat2')" aria-label="Show Alt Categories"
                     class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer">
                     <i data-lucide="chevron-down" class="w-4 h-4"></i>
                   </button>
-                  <div id="qa-cat2-dropdown" class="cat-combo-menu hidden absolute z-30 left-0 right-0 mt-1 max-h-48 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg py-1"></div>
+                  <div id="qa-cat2-dropdown" class="cat-combo-menu hidden absolute z-30 left-0 right-0 mt-1.5 max-h-52 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl py-1"></div>
                 </div>
               </div>
             </div>
 
-            <!-- Remarks + Tag Toggle -->
+            <!-- Remarks + Compact Tag Toggle -->
             <div>
               <div class="flex items-center justify-between mb-1.5">
                 <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400">Remarks</label>
-                <button type="button" onclick="toggleEventTagPanel()" id="btn-event-tag-toggle"
-                  class="text-[11px] font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1 cursor-pointer">
+                <button type="button" onclick="toggleEventTagPanel()" id="btn-toggle-event-tag"
+                  class="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer">
                   <i data-lucide="hash" class="w-3 h-3"></i>
                   <span id="event-tag-btn-label">Tag</span>
                 </button>
               </div>
+              <input type="text" id="qa-remarks"
+                class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-sm text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-emerald-500 outline-none" />
 
-              <!-- Optional Event / Trip Tag Banner -->
-              <div id="event-tag-panel" class="hidden mb-2 p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center gap-2">
-                <span class="text-xs font-bold text-slate-600 dark:text-slate-300 pl-1">#</span>
-                <input type="text" id="active-event-tag-input" oninput="saveActiveEventTag(this.value)"
-                  class="flex-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-300 dark:border-slate-700 px-2.5 py-1.5 text-xs font-semibold text-slate-900 dark:text-white outline-none" />
-                <button type="button" onclick="clearActiveEventTag()" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer">
+              <!-- Event Tag Bar (Hidden unless active or clicked) -->
+              <div id="event-tag-panel" class="hidden mt-2 flex items-center gap-2">
+                <div class="relative flex-1">
+                  <span class="absolute inset-y-0 left-3 flex items-center text-xs font-extrabold text-indigo-600 dark:text-indigo-400">#</span>
+                  <input type="text" id="active-event-tag-input" oninput="saveActiveEventTag(this.value)"
+                    class="w-full rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/70 dark:bg-indigo-950/50 pl-7 pr-3 py-1.5 text-xs font-bold text-indigo-900 dark:text-indigo-200 outline-none" />
+                </div>
+                <button type="button" onclick="clearActiveEventTag()" class="px-2.5 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-[11px] font-bold text-slate-600 dark:text-slate-300 cursor-pointer">
                   Off
                 </button>
               </div>
-
-              <input type="text" id="qa-remarks"
-                class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-sm text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-emerald-500 outline-none" />
             </div>
 
-            <!-- Collapsible Income, Investment & FX Drawer -->
-            <div class="pt-1">
-              <button type="button" onclick="toggleExtraActualFields()" id="btn-toggle-extra-actual"
-                class="w-full py-2.5 px-4 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition-colors cursor-pointer">
-                <span class="flex items-center gap-2">
-                  <i data-lucide="plus" class="w-3.5 h-3.5 text-emerald-600"></i>
-                  <span>Income, Investment & FX</span>
-                </span>
+            <!-- Optional Income / Investment / FX Accordion -->
+            <div class="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
+              <button type="button" onclick="toggleExtraActualFields()"
+                class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/70 flex items-center justify-between text-xs font-bold text-slate-600 dark:text-slate-300 cursor-pointer">
+                <span>Income / Investment / FX</span>
                 <i data-lucide="chevron-down" id="extra-actual-chevron" class="w-4 h-4 transition-transform"></i>
               </button>
-
-              <div id="extra-actual-drawer" class="hidden mt-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 grid grid-cols-2 gap-3.5">
+              <div id="extra-actual-drawer" class="hidden p-4 bg-white dark:bg-slate-900 grid grid-cols-2 sm:grid-cols-4 gap-3 border-t border-slate-100 dark:border-slate-800">
                 <div>
-                  <div class="flex items-center justify-between mb-1">
-                    <label class="text-[11px] font-bold text-sky-700 dark:text-sky-400">Income</label>
-                    <span id="calc-preview-qa-income" class="hidden text-[10px] font-bold text-sky-700 dark:text-sky-300"></span>
-                  </div>
-                  <input type="text" id="qa-income" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true"
-                    onblur="commitMathInput(this)"
-                    oninput="previewMathInput(this)" onkeydown="handleMathKeydown(event, this)"
-                    class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-bold text-slate-900 dark:text-white outline-none tabular-nums" />
+                  <label class="block text-[11px] font-semibold text-sky-700 dark:text-sky-400 mb-1">Income</label>
+                  <input type="text" id="qa-income" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" onblur="commitMathInput(this)"
+                    class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none" />
                 </div>
-
                 <div>
-                  <div class="flex items-center justify-between mb-1">
-                    <label class="text-[11px] font-bold text-emerald-700 dark:text-emerald-400">Investment</label>
-                    <span id="calc-preview-qa-investment" class="hidden text-[10px] font-bold text-emerald-700 dark:text-emerald-300"></span>
-                  </div>
-                  <input type="text" id="qa-investment" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true"
-                    onblur="commitMathInput(this)"
-                    oninput="previewMathInput(this)" onkeydown="handleMathKeydown(event, this)"
-                    class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-bold text-slate-900 dark:text-white outline-none tabular-nums" />
+                  <label class="block text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 mb-1">Investment</label>
+                  <input type="text" id="qa-investment" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" onblur="commitMathInput(this)"
+                    class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none" />
                 </div>
-
                 <div>
-                  <div class="flex items-center justify-between mb-1">
-                    <label class="text-[11px] font-bold text-slate-600 dark:text-slate-400">USD</label>
-                    <span id="calc-preview-qa-usd" class="hidden text-[10px] font-bold text-slate-600 dark:text-slate-300"></span>
-                  </div>
-                  <input type="text" id="qa-usd" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true"
-                    onblur="commitMathInput(this)"
-                    oninput="previewMathInput(this)" onkeydown="handleMathKeydown(event, this)"
-                    class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-bold text-slate-900 dark:text-white outline-none tabular-nums" />
+                  <label class="block text-[11px] font-semibold text-slate-500 mb-1">USD</label>
+                  <input type="text" id="qa-usd" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" onblur="commitMathInput(this)"
+                    class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none" />
                 </div>
-
                 <div>
-                  <div class="flex items-center justify-between mb-1">
-                    <label class="text-[11px] font-bold text-slate-600 dark:text-slate-400">GBP</label>
-                    <span id="calc-preview-qa-gbp" class="hidden text-[10px] font-bold text-slate-600 dark:text-slate-300"></span>
-                  </div>
-                  <input type="text" id="qa-gbp" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true"
-                    onblur="commitMathInput(this)"
-                    oninput="previewMathInput(this)" onkeydown="handleMathKeydown(event, this)"
-                    class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-bold text-slate-900 dark:text-white outline-none tabular-nums" />
+                  <label class="block text-[11px] font-semibold text-slate-500 mb-1">GBP</label>
+                  <input type="text" id="qa-gbp" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" onblur="commitMathInput(this)"
+                    class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none" />
                 </div>
               </div>
             </div>
 
-            <!-- Save CTA -->
+            <!-- Save Button -->
             <button type="submit"
               class="w-full py-3.5 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white text-sm font-extrabold shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer">
               <i data-lucide="check-circle-2" class="w-4 h-4"></i>
@@ -353,19 +326,16 @@
         </div>
       </div>
 
-      <!-- SUB-TAB B: BUDGETS -->
+      <!-- SUB-TAB B: BUDGETS (SETTLE MONTHLY BUDGETED ITEMS) -->
       <div id="entry-subtab-budgets" class="entry-subtab space-y-4">
-        <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-2xs space-y-4">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-3">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <h2 class="text-base font-extrabold text-slate-900 dark:text-white">Budgets</h2>
-
-            <div class="flex items-center gap-1.5">
-              <button type="button" onclick="shiftEntryMonth(-1)" title="Previous"
-                class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer">
+            <div class="flex flex-wrap items-center gap-2">
+              <button type="button" onclick="shiftEntryMonth(-1)" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer" title="Previous Month">
                 <i data-lucide="chevron-left" class="w-4 h-4"></i>
               </button>
               <select id="entry-filter-month" onchange="renderEntryBudgetList()"
-                class="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
+                class="rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
                 <option value="ALL">All Months</option>
                 <option value="Jan">Jan</option><option value="Feb">Feb</option><option value="Mar">Mar</option>
                 <option value="Apr">Apr</option><option value="May">May</option><option value="Jun">Jun</option>
@@ -373,132 +343,142 @@
                 <option value="Oct">Oct</option><option value="Nov">Nov</option><option value="Dec">Dec</option>
               </select>
               <select id="entry-filter-year" onchange="renderEntryBudgetList()"
-                class="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
+                class="rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
+                <option value="ALL">All Years</option>
               </select>
-              <button type="button" onclick="shiftEntryMonth(1)" title="Next"
-                class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer">
+              <button type="button" onclick="shiftEntryMonth(1)" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer" title="Next Month">
                 <i data-lucide="chevron-right" class="w-4 h-4"></i>
               </button>
             </div>
+
+            <div class="flex items-center gap-4 text-xs">
+              <div><span class="text-slate-400">Budget:</span> <strong id="eb-summary-budget" class="text-slate-900 dark:text-white">0.00</strong></div>
+              <div><span class="text-slate-400">Paid:</span> <strong id="eb-summary-actual" class="text-emerald-600 dark:text-emerald-400">0.00</strong></div>
+            </div>
           </div>
 
-          <!-- Status Filter Pills & Month Summary -->
-          <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-            <div class="flex flex-wrap gap-1.5">
-              <button type="button" onclick="setEntryStatusFilter('ALL')" id="eb-filter-ALL"
-                class="eb-filter-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 dark:bg-white text-white dark:text-slate-900 cursor-pointer">
-                All
-              </button>
-              <button type="button" onclick="setEntryStatusFilter('Pending')" id="eb-filter-Pending"
-                class="eb-filter-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer">
-                Pending
-              </button>
-              <button type="button" onclick="setEntryStatusFilter('Overdue')" id="eb-filter-Overdue"
-                class="eb-filter-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer">
-                Overdue
-              </button>
-              <button type="button" onclick="setEntryStatusFilter('Paid')" id="eb-filter-Paid"
-                class="eb-filter-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer">
-                Paid
-              </button>
-            </div>
-
-            <div class="text-xs font-semibold text-slate-600 dark:text-slate-400">
-              Budget: <strong id="eb-summary-budget" class="text-slate-900 dark:text-white">0.00</strong>
-              <span class="mx-1.5">•</span>
-              Paid: <strong id="eb-summary-actual" class="text-emerald-600 dark:text-emerald-400">0.00</strong>
-            </div>
+          <div class="flex flex-wrap gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <button type="button" onclick="setEntryStatusFilter('ALL')" id="eb-filter-ALL" class="eb-filter-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 dark:bg-white text-white dark:text-slate-900 cursor-pointer">All</button>
+            <button type="button" onclick="setEntryStatusFilter('Pending')" id="eb-filter-Pending" class="eb-filter-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer">Pending</button>
+            <button type="button" onclick="setEntryStatusFilter('Paid')" id="eb-filter-Paid" class="eb-filter-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer">Paid</button>
+            <button type="button" onclick="setEntryStatusFilter('Overdue')" id="eb-filter-Overdue" class="eb-filter-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-rose-600 dark:text-rose-400 cursor-pointer">Overdue</button>
           </div>
         </div>
 
-        <!-- Budget Items List -->
-        <div id="entry-budget-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+        <div id="entry-budget-list" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
       </div>
 
-      <!-- SUB-TAB C: SCHEDULE -->
+      <!-- SUB-TAB C: SCHEDULE (NEW BUDGETED / RECURRING ITEMS) -->
       <div id="entry-subtab-plan" class="entry-subtab">
         <div class="max-w-2xl mx-auto bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
           <div class="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-            <h2 class="text-base font-extrabold text-slate-900 dark:text-white">Schedule</h2>
-            <button type="button" onclick="resetPlanBudgetForm()" class="text-xs font-semibold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white cursor-pointer">
-              Clear
-            </button>
+            <h2 class="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">Schedule Budget</h2>
+            <button type="button" onclick="resetPlanBudgetForm()" class="text-xs font-semibold text-slate-500 hover:text-slate-800 dark:text-slate-400 cursor-pointer">Clear</button>
           </div>
 
-          <form id="plan-budget-form" onsubmit="handlePlanBudgetSubmit(event)" class="p-5 sm:p-6 space-y-4">
+          <form id="plan-budget-form" onsubmit="handlePlanBudgetSubmit(event)" class="p-5 sm:p-6 space-y-5">
             <div>
               <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Description *</label>
               <div class="relative">
                 <input type="text" id="pb-task" required autocomplete="off"
-                  onfocus="openTaskDropdown('pb-task')"
-                  oninput="filterTaskDropdown('pb-task'); handlePlanTaskAutoMatch(this.value)"
-                  onchange="handlePlanTaskAutoMatch(this.value)"
+                  oninput="filterTaskDropdown('pb-task')"
                   onkeydown="handleTaskKeydown(event, 'pb-task')"
                   class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-sm font-semibold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 outline-none" />
-                <div id="pb-task-dropdown" class="cat-combo-menu hidden absolute z-30 left-0 right-0 mt-1 max-h-48 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg py-1"></div>
+                <div id="pb-task-dropdown" class="cat-combo-menu hidden absolute z-30 left-0 right-0 mt-1.5 max-h-52 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl py-1"></div>
               </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Date *</label>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Category *</label>
+                <div class="relative">
+                  <input type="text" id="pb-cat1" required autocomplete="off"
+                    onfocus="openCategoryDropdown('pb-cat1')"
+                    oninput="filterCategoryDropdown('pb-cat1'); mirrorCategoryToAlt('pb-cat1', 'pb-cat2')"
+                    onkeydown="handleCategoryKeydown(event, 'pb-cat1', 'pb-cat2')"
+                    class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 pl-3.5 pr-9 py-3 text-sm font-semibold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 outline-none" />
+                  <button type="button" tabindex="-1" onclick="toggleCategoryDropdown('pb-cat1')" aria-label="Show Categories"
+                    class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer">
+                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                  </button>
+                  <div id="pb-cat1-dropdown" class="cat-combo-menu hidden absolute z-30 left-0 right-0 mt-1.5 max-h-52 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl py-1"></div>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Alt Category</label>
+                <div class="relative">
+                  <input type="text" id="pb-cat2" autocomplete="off"
+                    onfocus="openCategoryDropdown('pb-cat2')"
+                    oninput="this.dataset.customized = 'true'; filterCategoryDropdown('pb-cat2')"
+                    onkeydown="handleCategoryKeydown(event, 'pb-cat2')"
+                    class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 pl-3.5 pr-9 py-3 text-sm font-semibold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 outline-none" />
+                  <button type="button" tabindex="-1" onclick="toggleCategoryDropdown('pb-cat2')" aria-label="Show Alt Categories"
+                    class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer">
+                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                  </button>
+                  <div id="pb-cat2-dropdown" class="cat-combo-menu hidden absolute z-30 left-0 right-0 mt-1.5 max-h-52 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl py-1"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Budgeted Date *</label>
                 <input type="date" id="pb-budget-date" required onchange="syncPlanFromDate()"
-                  class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-3 text-sm font-semibold text-slate-900 dark:text-white outline-none" />
+                  class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-3 text-sm font-semibold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 outline-none" />
               </div>
 
               <div>
                 <div class="flex items-center justify-between mb-1.5">
-                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400">Amount *</label>
-                  <span id="calc-preview-pb-budget-amount" class="hidden text-[11px] font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950 px-2 py-0.5 rounded-full"></span>
+                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400">Budget Amount *</label>
+                  <span id="calc-preview-pb-budget-amount" class="hidden text-[11px] font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/80 px-2 py-0.5 rounded-full"></span>
                 </div>
                 <input type="text" id="pb-budget-amount" required inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true"
                   onblur="commitMathInput(this)"
                   oninput="previewMathInput(this)" onkeydown="handleMathKeydown(event, this)"
-                  class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-3 text-base font-extrabold text-slate-900 dark:text-white outline-none tabular-nums" />
+                  class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-3 text-base font-extrabold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 outline-none tabular-nums" />
               </div>
             </div>
 
-            <!-- Recurring Section -->
-            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Recurring</label>
-                  <select id="pb-recurring" onchange="togglePlanRecurringFields()"
-                    class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm font-semibold text-slate-900 dark:text-white outline-none">
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Frequency</label>
-                  <select id="pb-frequency"
-                    class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm font-semibold text-slate-900 dark:text-white outline-none">
-                  </select>
-                </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Recurring</label>
+                <select id="pb-recurring" onchange="togglePlanRecurringFields()"
+                  class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-3 text-sm font-semibold text-slate-900 dark:text-white outline-none">
+                </select>
               </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Frequency</label>
+                <select id="pb-frequency"
+                  class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-3 text-sm font-semibold text-slate-900 dark:text-white outline-none">
+                </select>
+              </div>
+            </div>
 
-              <div id="plan-recurring-dates" class="hidden grid grid-cols-2 gap-3 pt-1">
-                <div>
-                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">From</label>
-                  <input type="date" id="pb-from-date"
-                    class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-semibold text-slate-900 dark:text-white outline-none" />
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">To</label>
-                  <input type="date" id="pb-to-date"
-                    class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-semibold text-slate-900 dark:text-white outline-none" />
-                </div>
+            <div id="plan-recurring-dates" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">From</label>
+                <input type="date" id="pb-from-date"
+                  class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white outline-none" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">To</label>
+                <input type="date" id="pb-to-date"
+                  class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white outline-none" />
               </div>
             </div>
 
             <div>
               <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Remarks</label>
               <input type="text" id="pb-remarks"
-                class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-2.5 text-sm text-slate-900 dark:text-white outline-none" />
+                class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-sm text-slate-900 dark:text-white outline-none" />
             </div>
 
             <button type="submit"
-              class="w-full py-3.5 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-extrabold shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer">
+              class="w-full py-3.5 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white text-sm font-extrabold shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer">
               <i data-lucide="calendar-plus" class="w-4 h-4"></i>
-              <span>Save</span>
+              <span>Schedule Budget</span>
             </button>
           </form>
         </div>
@@ -743,30 +723,86 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800">
-          <select id="filter-year" onchange="applyLedgerFilters()" class="rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white outline-none">
-            <option value="ALL">All Years</option>
-          </select>
-          <select id="filter-month" onchange="applyLedgerFilters()" class="rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white outline-none">
-            <option value="ALL">All Months</option>
-            <option value="Jan">Jan</option><option value="Feb">Feb</option><option value="Mar">Mar</option>
-            <option value="Apr">Apr</option><option value="May">May</option><option value="Jun">Jun</option>
-            <option value="Jul">Jul</option><option value="Aug">Aug</option><option value="Sep">Sep</option>
-            <option value="Oct">Oct</option><option value="Nov">Nov</option><option value="Dec">Dec</option>
-          </select>
-          <select id="filter-category" onchange="applyLedgerFilters()" class="rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white outline-none">
-            <option value="ALL">All Categories</option>
-          </select>
-          <select id="filter-payment" onchange="applyLedgerFilters()" class="rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white outline-none">
-            <option value="ALL">All Status</option>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800">
+          <!-- 1. Category Multi-Select -->
+          <div class="relative w-full" id="led-cat1-wrapper">
+            <button type="button" onclick="toggleDashMultiDropdown('led-cat1-menu')"
+              class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none flex items-center justify-between gap-2 cursor-pointer">
+              <span id="led-cat1-label" class="truncate">Category</span>
+              <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
+            </button>
+            <div id="led-cat1-menu" class="cat-combo-menu hidden absolute z-30 left-0 mt-1.5 w-60 max-h-64 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl p-2 space-y-1">
+              <div class="flex items-center justify-between px-2 py-1 border-b border-slate-100 dark:border-slate-800 text-[11px] font-bold">
+                <button type="button" onclick="setAllLedgerFilterItems('cat1', true)" class="text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer">Select All</button>
+                <button type="button" onclick="setAllLedgerFilterItems('cat1', false)" class="text-slate-500 hover:underline cursor-pointer">Clear</button>
+              </div>
+              <div id="led-cat1-options" class="space-y-0.5 pt-1"></div>
+            </div>
+          </div>
+
+          <!-- 2. Alt Category Multi-Select -->
+          <div class="relative w-full" id="led-cat2-wrapper">
+            <button type="button" onclick="toggleDashMultiDropdown('led-cat2-menu')"
+              class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none flex items-center justify-between gap-2 cursor-pointer">
+              <span id="led-cat2-label" class="truncate">Alt Category</span>
+              <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
+            </button>
+            <div id="led-cat2-menu" class="cat-combo-menu hidden absolute z-30 right-0 sm:left-0 sm:right-auto mt-1.5 w-60 max-h-64 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl p-2 space-y-1">
+              <div class="flex items-center justify-between px-2 py-1 border-b border-slate-100 dark:border-slate-800 text-[11px] font-bold">
+                <button type="button" onclick="setAllLedgerFilterItems('cat2', true)" class="text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer">Select All</button>
+                <button type="button" onclick="setAllLedgerFilterItems('cat2', false)" class="text-slate-500 hover:underline cursor-pointer">Clear</button>
+              </div>
+              <div id="led-cat2-options" class="space-y-0.5 pt-1"></div>
+            </div>
+          </div>
+
+          <!-- 3. Year Multi-Select (Oldest to Newest) -->
+          <div class="relative w-full" id="led-year-wrapper">
+            <button type="button" onclick="toggleDashMultiDropdown('led-year-menu')"
+              class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none flex items-center justify-between gap-2 cursor-pointer">
+              <span id="led-year-label" class="truncate">Year</span>
+              <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
+            </button>
+            <div id="led-year-menu" class="cat-combo-menu hidden absolute z-30 left-0 mt-1.5 w-48 max-h-64 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl p-2 space-y-1">
+              <div class="flex items-center justify-between px-2 py-1 border-b border-slate-100 dark:border-slate-800 text-[11px] font-bold">
+                <button type="button" onclick="setAllLedgerFilterItems('year', true)" class="text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer">Select All</button>
+                <button type="button" onclick="setAllLedgerFilterItems('year', false)" class="text-slate-500 hover:underline cursor-pointer">Clear</button>
+              </div>
+              <div id="led-year-options" class="space-y-0.5 pt-1"></div>
+            </div>
+          </div>
+
+          <!-- 4. Month Multi-Select -->
+          <div class="relative w-full" id="led-month-wrapper">
+            <button type="button" onclick="toggleDashMultiDropdown('led-month-menu')"
+              class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none flex items-center justify-between gap-2 cursor-pointer">
+              <span id="led-month-label" class="truncate">Month</span>
+              <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
+            </button>
+            <div id="led-month-menu" class="cat-combo-menu hidden absolute z-30 right-0 sm:left-0 sm:right-auto mt-1.5 w-48 max-h-64 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl p-2 space-y-1">
+              <div class="flex items-center justify-between px-2 py-1 border-b border-slate-100 dark:border-slate-800 text-[11px] font-bold">
+                <button type="button" onclick="setAllLedgerFilterItems('month', true)" class="text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer">Select All</button>
+                <button type="button" onclick="setAllLedgerFilterItems('month', false)" class="text-slate-500 hover:underline cursor-pointer">Clear</button>
+              </div>
+              <div id="led-month-options" class="space-y-0.5 pt-1"></div>
+            </div>
+          </div>
+
+          <!-- 5. Status -->
+          <select id="filter-payment" onchange="applyLedgerFilters()" class="rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
+            <option value="ALL">Status</option>
             <option value="Paid">Paid</option>
             <option value="Pending">Pending</option>
           </select>
-          <select id="filter-tag" onchange="applyLedgerFilters()" class="rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white outline-none">
-            <option value="ALL">All Tags</option>
+
+          <!-- 6. Tag -->
+          <select id="filter-tag" onchange="applyLedgerFilters()" class="rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
+            <option value="ALL">Tag</option>
           </select>
+
+          <!-- 7. Search -->
           <input type="text" id="filter-search" oninput="applyLedgerFilters()" placeholder="Search"
-            class="rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs text-slate-900 dark:text-white outline-none" />
+            class="col-span-2 sm:col-span-1 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white outline-none" />
         </div>
       </div>
 
@@ -1186,6 +1222,38 @@
 
         <div class="grid grid-cols-2 gap-3.5">
           <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Category *</label>
+            <div class="relative">
+              <input type="text" id="mod-cat1" required autocomplete="off"
+                onfocus="openCategoryDropdown('mod-cat1')"
+                oninput="filterCategoryDropdown('mod-cat1'); mirrorCategoryToAlt('mod-cat1', 'mod-cat2')"
+                onkeydown="handleCategoryKeydown(event, 'mod-cat1', 'mod-cat2')"
+                class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 pl-3 pr-8 py-2 text-xs font-semibold text-slate-900 dark:text-white outline-none" />
+              <button type="button" tabindex="-1" onclick="toggleCategoryDropdown('mod-cat1')"
+                class="absolute inset-y-0 right-0 px-2.5 flex items-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer">
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+              </button>
+              <div id="mod-cat1-dropdown" class="cat-combo-menu hidden absolute z-30 left-0 right-0 mt-1 max-h-44 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg py-1"></div>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Alt Category</label>
+            <div class="relative">
+              <input type="text" id="mod-cat2" autocomplete="off"
+                onfocus="openCategoryDropdown('mod-cat2')"
+                oninput="this.dataset.customized = 'true'; filterCategoryDropdown('mod-cat2')"
+                onkeydown="handleCategoryKeydown(event, 'mod-cat2')"
+                class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 pl-3 pr-8 py-2 text-xs font-semibold text-slate-900 dark:text-white outline-none" />
+              <button type="button" tabindex="-1" onclick="toggleCategoryDropdown('mod-cat2')"
+                class="absolute inset-y-0 right-0 px-2.5 flex items-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer">
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+              </button>
+              <div id="mod-cat2-dropdown" class="cat-combo-menu hidden absolute z-30 left-0 right-0 mt-1 max-h-44 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg py-1"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3.5">
             <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Budget Date</label>
             <input type="date" id="mod-budget-date"
               class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white outline-none" />
@@ -1332,7 +1400,7 @@
         "Employment", "Eat-Out", "Digital Subscriptions", "Self", "Meals",
         "Side Hustles", "Entertainment", "Spiritual", "Savings & Investments"
       ],
-      recurringOptions: ["None", "Fixed", "Variable"],
+      recurringOptions: ["No", "Yes"],
       frequencies: ["Monthly", "Quarterly", "Annually"]
     };
 
@@ -1356,6 +1424,10 @@
     let excludedDashAltCategories = new Set();
     let excludedDashYears = new Set();
     let excludedDashMonths = new Set();
+    let excludedLedgerCategories = new Set();
+    let excludedLedgerAltCategories = new Set();
+    let excludedLedgerYears = new Set();
+    let excludedLedgerMonths = new Set();
     let supabaseClient = null;
     let supabaseUser = null;
     let cloudSyncTimer = null;
@@ -1529,8 +1601,9 @@
       rec.task = (rec.task || "").trim();
       rec.cat1 = (rec.cat1 || "").trim();
       rec.cat2 = (rec.cat2 || "").trim();
-      rec.recurring = rec.recurring || "None";
-      rec.frequency = rec.frequency || "";
+      const rawRec = String(rec.recurring || "").trim();
+      rec.recurring = (!rawRec || rawRec === "None" || rawRec.toLowerCase() === "no") ? "No" : "Yes";
+      rec.frequency = rec.recurring === "Yes" ? (rec.frequency || "") : "";
       rec.remarks = (rec.remarks || "").trim();
 
       const hasActualAmt = rec.actualAmount !== null && rec.actualAmount !== undefined && rec.actualAmount !== "";
@@ -1633,9 +1706,14 @@
         if (savedMaster) {
           const parsed = JSON.parse(savedMaster);
           if (parsed && Array.isArray(parsed.categories)) {
+            const savedRecOpts = Array.isArray(parsed.recurringOptions) &&
+              !parsed.recurringOptions.includes("Fixed") &&
+              !parsed.recurringOptions.includes("None")
+              ? parsed.recurringOptions
+              : DEFAULT_MASTER.recurringOptions;
             masterData = {
               categories: parsed.categories,
-              recurringOptions: parsed.recurringOptions || DEFAULT_MASTER.recurringOptions,
+              recurringOptions: savedRecOpts,
               frequencies: parsed.frequencies || DEFAULT_MASTER.frequencies
             };
           }
@@ -1696,12 +1774,12 @@
       const y = new Date().getFullYear();
       const m = String(new Date().getMonth() + 1).padStart(2, "0");
       return [
-        { actualDate: `${y}-${m}-01`, task: "Monthly Salary", cat1: "Employment", cat2: "Employment", actualAmount: null, income: 250000, investment: null, budgetedDate: `${y}-${m}-01`, budgetAmount: null, recurring: "None", remarks: "Primary income" },
-        { actualDate: `${y}-${m}-03`, task: "Supermarket Groceries", cat1: "Groceries", cat2: "Groceries", actualAmount: 18500, income: null, investment: null, budgetedDate: `${y}-${m}-05`, budgetAmount: 20000, recurring: "Fixed", frequency: "Monthly", remarks: "" },
-        { actualDate: `${y}-${m}-05`, task: "Home Fiber & Mobile", cat1: "Communication", cat2: "Communication", actualAmount: 6450, income: null, investment: null, budgetedDate: `${y}-${m}-05`, budgetAmount: 6500, recurring: "Fixed", frequency: "Monthly", remarks: "" },
-        { actualDate: "", task: "Electricity & Water Bill", cat1: "Utilities", cat2: "Utilities", actualAmount: null, income: null, investment: null, budgetedDate: `${y}-${m}-25`, budgetAmount: 14000, recurring: "Variable", frequency: "Monthly", remarks: "" },
-        { actualDate: "", task: "Vehicle Insurance Renewal", cat1: "Insurance", cat2: "Vehicle", actualAmount: null, income: null, investment: null, budgetedDate: `${y}-${m}-28`, budgetAmount: 42000, recurring: "Fixed", frequency: "Annually", remarks: "" },
-        { actualDate: `${y}-${m}-08`, task: "Unit Trust SIP", cat1: "Savings & Investments", cat2: "Savings & Investments", actualAmount: 35000, income: null, investment: 35000, budgetedDate: `${y}-${m}-08`, budgetAmount: 35000, recurring: "Fixed", frequency: "Monthly", remarks: "" }
+        { actualDate: `${y}-${m}-01`, task: "Monthly Salary", cat1: "Employment", cat2: "Employment", actualAmount: null, income: 250000, investment: null, budgetedDate: `${y}-${m}-01`, budgetAmount: null, recurring: "No", remarks: "Primary income" },
+        { actualDate: `${y}-${m}-03`, task: "Supermarket Groceries", cat1: "Groceries", cat2: "Groceries", actualAmount: 18500, income: null, investment: null, budgetedDate: `${y}-${m}-05`, budgetAmount: 20000, recurring: "Yes", frequency: "Monthly", remarks: "" },
+        { actualDate: `${y}-${m}-05`, task: "Home Fiber & Mobile", cat1: "Communication", cat2: "Communication", actualAmount: 6450, income: null, investment: null, budgetedDate: `${y}-${m}-05`, budgetAmount: 6500, recurring: "Yes", frequency: "Monthly", remarks: "" },
+        { actualDate: "", task: "Electricity & Water Bill", cat1: "Utilities", cat2: "Utilities", actualAmount: null, income: null, investment: null, budgetedDate: `${y}-${m}-25`, budgetAmount: 14000, recurring: "Yes", frequency: "Monthly", remarks: "" },
+        { actualDate: "", task: "Vehicle Insurance Renewal", cat1: "Insurance", cat2: "Vehicle", actualAmount: null, income: null, investment: null, budgetedDate: `${y}-${m}-28`, budgetAmount: 42000, recurring: "Yes", frequency: "Annually", remarks: "" },
+        { actualDate: `${y}-${m}-08`, task: "Unit Trust SIP", cat1: "Savings & Investments", cat2: "Savings & Investments", actualAmount: 35000, income: null, investment: 35000, budgetedDate: `${y}-${m}-08`, budgetAmount: 35000, recurring: "Yes", frequency: "Monthly", remarks: "" }
       ];
     }
 
@@ -2149,7 +2227,7 @@
           gbp,
           budgetedDate: "",
           budgetAmount: null,
-          recurring: "None",
+          recurring: "No",
           frequency: "",
           fromDate: "",
           toDate: "",
@@ -2179,7 +2257,7 @@
       const recVal = document.getElementById("pb-recurring").value;
       const box = document.getElementById("plan-recurring-dates");
       if (!box) return;
-      if (recVal && recVal !== "None") {
+      if (recVal === "Yes") {
         box.classList.remove("hidden");
         syncPlanFromDate();
       } else {
@@ -2191,6 +2269,8 @@
       const form = document.getElementById("plan-budget-form");
       if (form) form.reset();
       document.getElementById("pb-budget-date").value = getTodayISO();
+      const recSel = document.getElementById("pb-recurring");
+      if (recSel) recSel.value = "No";
       const c1 = document.getElementById("pb-cat1");
       const c2 = document.getElementById("pb-cat2");
       if (c1) c1.value = "";
@@ -2204,14 +2284,14 @@
     function handlePlanBudgetSubmit(e) {
       e.preventDefault();
       const task = document.getElementById("pb-task").value.trim();
-      const cat1 = document.getElementById("pb-cat1").value.trim();
-      const cat2 = document.getElementById("pb-cat2").value.trim() || cat1;
+      const cat1 = document.getElementById("pb-cat1")?.value.trim() || "";
+      const cat2 = document.getElementById("pb-cat2")?.value.trim() || cat1;
       const budgetedDate = document.getElementById("pb-budget-date").value;
       const budgetAmount = evaluateMathExpression(document.getElementById("pb-budget-amount").value);
-      const recurring = document.getElementById("pb-recurring").value || "None";
-      const frequency = recurring === "None" ? "" : (document.getElementById("pb-frequency").value || "Monthly");
-      const fromDate = recurring === "None" ? "" : (document.getElementById("pb-from-date").value || budgetedDate);
-      const toDate = recurring === "None" ? "" : document.getElementById("pb-to-date").value;
+      const recurring = document.getElementById("pb-recurring").value === "Yes" ? "Yes" : "No";
+      const frequency = recurring === "No" ? "" : (document.getElementById("pb-frequency").value || "Monthly");
+      const fromDate = recurring === "No" ? "" : (document.getElementById("pb-from-date").value || budgetedDate);
+      const toDate = recurring === "No" ? "" : document.getElementById("pb-to-date").value;
       const remarks = document.getElementById("pb-remarks").value.trim();
 
       if (!task || !cat1 || !budgetedDate || budgetAmount === null) {
@@ -2239,7 +2319,7 @@
       });
       records.push(newRec);
 
-      if (recurring !== "None" && fromDate && toDate) {
+      if (recurring === "Yes" && fromDate && toDate) {
         generateRecurringChildrenForRecord(newRec);
       }
 
@@ -2294,7 +2374,7 @@
 
     function runRecurringMacro() {
       let totalCreated = 0;
-      const seeds = records.filter(r => r.recurring && r.recurring !== "None" && r.toDate);
+      const seeds = records.filter(r => r.recurring === "Yes" && r.toDate);
       seeds.forEach(s => {
         totalCreated += generateRecurringChildrenForRecord(s);
       });
@@ -2672,6 +2752,8 @@
 
       const filtered = getFilteredDashboardRecords();
       const todayISO = getTodayISO();
+      const currentYearStr = String(new Date().getFullYear());
+      const currentMonthStr = MONTHS_SHORT[new Date().getMonth()];
 
       let totalBudget = 0;
       let totalSpent = 0;
@@ -2682,6 +2764,7 @@
       let budgetedActualExpenseCount = 0;
       let pendingAsAtTodayCount = 0;
       let overdueAsAtTodayCount = 0;
+      let currentMonthPendingBudgetCount = 0;
 
       filtered.forEach(r => {
         const b = r.budgetAmount || 0;
@@ -2706,6 +2789,10 @@
           pendingAsAtTodayCount++;
           if (isRecordOverdue(r)) overdueAsAtTodayCount++;
         }
+
+        if (r.payment === "Pending" && b > 0 && r.budgetYear === currentYearStr && r.budgetMonth === currentMonthStr) {
+          currentMonthPendingBudgetCount++;
+        }
       });
 
       const balance = totalBudget - totalSpent;
@@ -2723,11 +2810,11 @@
       document.getElementById("d-kpi-nonbudget").textContent = `${budgetedActualExpenseCount} / ${totalActualExpenseCount} budgeted`;
       document.getElementById("d-kpi-income").textContent = formatMoney(totalIncome);
       document.getElementById("d-kpi-invest").textContent = `Invested: ${formatMoney(totalInvest)}`;
-      document.getElementById("d-kpi-pending-count").textContent = pendingAsAtTodayCount;
+      document.getElementById("d-kpi-pending-count").textContent = currentMonthPendingBudgetCount;
       const ovBadge = document.getElementById("d-kpi-overdue-badge");
       if (ovBadge) {
         ovBadge.textContent = `${overdueAsAtTodayCount} overdue`;
-        ovBadge.classList.toggle("hidden", overdueAsAtTodayCount === 0);
+        ovBadge.classList.add("hidden");
       }
 
       renderDashboardCharts(filtered, yoyEnabled);
@@ -3127,24 +3214,110 @@
     /* ===================================================================== */
     /* LEDGER TABLE & CSV IMPORT / EXPORT                                    */
     /* ===================================================================== */
+    function getLedgerFilterConfig(dim) {
+      if (dim === "cat2") {
+        return {
+          set: excludedLedgerAltCategories,
+          allItems: getSortedCategories(),
+          labelId: "led-cat2-label",
+          chkClass: ".led-cat2-chk",
+          baseLabel: "Alt Category",
+          noneLabel: "No Alt Category",
+          pluralLabel: "Alt Categories"
+        };
+      }
+      if (dim === "year") {
+        return {
+          set: excludedLedgerYears,
+          allItems: getDashSortedYearsAsc(),
+          labelId: "led-year-label",
+          chkClass: ".led-year-chk",
+          baseLabel: "Year",
+          noneLabel: "No Year",
+          pluralLabel: "Years"
+        };
+      }
+      if (dim === "month") {
+        return {
+          set: excludedLedgerMonths,
+          allItems: MONTHS_SHORT,
+          labelId: "led-month-label",
+          chkClass: ".led-month-chk",
+          baseLabel: "Month",
+          noneLabel: "No Month",
+          pluralLabel: "Months"
+        };
+      }
+      return {
+        set: excludedLedgerCategories,
+        allItems: getSortedCategories(),
+        labelId: "led-cat1-label",
+        chkClass: ".led-cat1-chk",
+        baseLabel: "Category",
+        noneLabel: "No Category",
+        pluralLabel: "Categories"
+      };
+    }
+
+    function toggleLedgerFilterItem(dim, val, isChecked) {
+      const cfg = getLedgerFilterConfig(dim);
+      if (isChecked) {
+        cfg.set.delete(val);
+      } else {
+        cfg.set.add(val);
+      }
+      updateLedgerFilterLabel(dim);
+      applyLedgerFilters();
+    }
+
+    function setAllLedgerFilterItems(dim, selectAll) {
+      const cfg = getLedgerFilterConfig(dim);
+      cfg.set.clear();
+      if (!selectAll) {
+        cfg.allItems.forEach(item => cfg.set.add(item));
+      }
+      document.querySelectorAll(cfg.chkClass).forEach(cb => { cb.checked = selectAll; });
+      updateLedgerFilterLabel(dim);
+      applyLedgerFilters();
+    }
+
+    function updateLedgerFilterLabel(dim) {
+      const cfg = getLedgerFilterConfig(dim);
+      const labelEl = document.getElementById(cfg.labelId);
+      if (!labelEl) return;
+
+      const selectedItems = cfg.allItems.filter(v => !cfg.set.has(v));
+      if (cfg.set.size === 0 || selectedItems.length === cfg.allItems.length) {
+        labelEl.textContent = cfg.baseLabel;
+      } else if (selectedItems.length === 0) {
+        labelEl.textContent = cfg.noneLabel;
+      } else if (selectedItems.length === 1) {
+        labelEl.textContent = selectedItems[0];
+      } else {
+        labelEl.textContent = `${selectedItems.length} of ${cfg.allItems.length} ${cfg.pluralLabel}`;
+      }
+    }
+
     function applyLedgerFilters() {
       const tbody = document.getElementById("ledger-tbody");
       const emptyEl = document.getElementById("ledger-empty");
       if (!tbody) return;
 
-      const yF = document.getElementById("filter-year")?.value || "ALL";
-      const mF = document.getElementById("filter-month")?.value || "ALL";
-      const cF = document.getElementById("filter-category")?.value || "ALL";
       const pF = document.getElementById("filter-payment")?.value || "ALL";
       const tF = document.getElementById("filter-tag")?.value || "ALL";
       const qF = (document.getElementById("filter-search")?.value || "").trim().toLowerCase();
 
       const filtered = records.filter(r => {
-        const yr = r.expenseYear || r.budgetYear || r.incomeYear;
-        const mo = r.expenseMonth || r.budgetMonth || r.incomeMonth;
-        if (yF !== "ALL" && yr !== yF) return false;
-        if (mF !== "ALL" && mo !== mF) return false;
-        if (cF !== "ALL" && r.cat1 !== cF) return false;
+        const yr = r.expenseYear || r.budgetYear || r.incomeYear || r.investmentYear;
+        const mo = r.expenseMonth || r.budgetMonth || r.incomeMonth || r.investmentMonth;
+        if (yr && excludedLedgerYears.has(yr)) return false;
+        if (!yr && excludedLedgerYears.size > 0) return false;
+        if (mo && excludedLedgerMonths.has(mo)) return false;
+        if (!mo && excludedLedgerMonths.size > 0) return false;
+        const rowCat1 = r.cat1 || "Uncategorized";
+        if (excludedLedgerCategories.has(rowCat1)) return false;
+        const rowCat2 = (r.cat2 || r.cat1) || "Uncategorized";
+        if (excludedLedgerAltCategories.has(rowCat2)) return false;
         if (pF !== "ALL" && r.payment !== pF) return false;
         if (tF !== "ALL" && !extractTagsFromRemarks(r.remarks).includes(tF)) return false;
         if (qF && !`${r.task} ${r.cat1} ${r.cat2} ${r.remarks}`.toLowerCase().includes(qF)) return false;
@@ -3296,7 +3469,7 @@
               gbp: parseNumOrNull(cols[9]),
               budgetedDate: cols[10] || "",
               budgetAmount: parseNumOrNull(cols[11]),
-              recurring: cols[12] || "None",
+              recurring: cols[12] || "No",
               frequency: cols[13] || "",
               fromDate: cols[14] || "",
               toDate: cols[15] || "",
@@ -3490,11 +3663,29 @@
       renderDashChecklist("dash-year-options", sortedYearsAsc, "year", "dash-year-chk", excludedDashYears);
       renderDashChecklist("dash-month-options", MONTHS_SHORT, "month", "dash-month-chk", excludedDashMonths);
 
-      fillSelect("dash-tag", sortedTags, "Tag");
+      const renderLedgerChecklist = (containerId, items, dim, chkClass, excludedSet) => {
+        const el = document.getElementById(containerId);
+        if (!el) return;
+        el.innerHTML = items.map(val => {
+          const isChecked = !excludedSet.has(val);
+          return `
+            <label class="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
+              <input type="checkbox" class="${chkClass} rounded text-indigo-600 w-3.5 h-3.5" ${isChecked ? "checked" : ""}
+                onchange="toggleLedgerFilterItem('${dim}', '${escapeAttr(val)}', this.checked)" />
+              <span class="truncate">${escapeHtml(val)}</span>
+            </label>
+          `;
+        }).join("");
+        updateLedgerFilterLabel(dim);
+      };
 
-      fillSelect("filter-year", sortedYearsDesc, "All Years");
-      fillSelect("filter-category", sortedCats1, "All Categories");
-      fillSelect("filter-tag", sortedTags, "All Tags");
+      renderLedgerChecklist("led-cat1-options", sortedCats1, "cat1", "led-cat1-chk", excludedLedgerCategories);
+      renderLedgerChecklist("led-cat2-options", sortedCats2, "cat2", "led-cat2-chk", excludedLedgerAltCategories);
+      renderLedgerChecklist("led-year-options", sortedYearsAsc, "year", "led-year-chk", excludedLedgerYears);
+      renderLedgerChecklist("led-month-options", MONTHS_SHORT, "month", "led-month-chk", excludedLedgerMonths);
+
+      fillSelect("dash-tag", sortedTags, "Tag");
+      fillSelect("filter-tag", sortedTags, "Tag");
       fillSelect("entry-filter-year", sortedYearsDesc, "All Years");
 
       fillSelect("pb-recurring", masterData.recurringOptions, null);
@@ -3505,15 +3696,23 @@
     /* NOTIFICATIONS & OVERVIEW STATS                                        */
     /* ===================================================================== */
     function updateNotificationBadges() {
-      const pending = records.filter(r => r.payment === "Pending");
       const overdue = records.filter(r => isRecordOverdue(r));
+      const now = new Date();
+      const curYear = String(now.getFullYear());
+      const curMonth = MONTHS_SHORT[now.getMonth()];
+      const currentMonthPendingCount = records.filter(r =>
+        r.payment === "Pending" &&
+        (r.budgetAmount || 0) > 0 &&
+        r.budgetYear === curYear &&
+        r.budgetMonth === curMonth
+      ).length;
       const badge = document.getElementById("notif-badge");
       const pill = document.getElementById("subtab-pending-pill");
       if (badge) {
         badge.textContent = overdue.length;
         badge.classList.toggle("hidden", overdue.length === 0);
       }
-      if (pill) pill.textContent = pending.length;
+      if (pill) pill.textContent = currentMonthPendingCount;
 
       const listEl = document.getElementById("notifications-list");
       if (listEl) {
@@ -3817,8 +4016,10 @@
       if (landingSel) landingSel.value = appSettings.defaultLanding || "dashboard";
       if (currInp) currInp.value = appSettings.currency || "LKR";
 
-      document.getElementById("qa-actual-date").value = getTodayISO();
-      document.getElementById("pb-budget-date").value = getTodayISO();
+      const qaDateEl = document.getElementById("qa-actual-date");
+      const pbDateEl = document.getElementById("pb-budget-date");
+      if (qaDateEl) qaDateEl.value = getTodayISO();
+      if (pbDateEl) pbDateEl.value = getTodayISO();
 
       populateDropdowns();
       updateNotificationBadges();
