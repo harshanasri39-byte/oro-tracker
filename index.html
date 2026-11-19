@@ -133,12 +133,13 @@
           <i data-lucide="database" class="w-3.5 h-3.5"></i> Master
         </button>
         <button type="button" onclick="navigateTo('settings')" id="nav-settings" class="nav-pill px-4 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-2">
-          <i data-lucide="settings" class="w-3.5 h-3.5"></i> Settings
-        </button>
-      </nav>
-
-      <!-- Right: Minimal Utility Icons (Alerts & Theme Toggle) -->
+      <!-- Right: Minimal Utility Icons (Manual Sync, Alerts & Theme Toggle) -->
       <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <button type="button" onclick="syncCloudNow(true)" id="btn-header-sync" title="Manual Cloud Sync"
+          class="hidden w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors cursor-pointer">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+        </button>
+
         <button type="button" onclick="toggleNotificationsDrawer()" id="btn-notif" title="Alerts"
           class="relative w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors cursor-pointer">
           <i data-lucide="bell" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
@@ -1432,6 +1433,7 @@
     let supabaseClient = null;
     let supabaseUser = null;
     let cloudSyncTimer = null;
+    let isCloudSyncing = false;
 
     /* ===================================================================== */
     /* DATE & NUMBER PARSING UTILITIES                                       */
@@ -1687,6 +1689,45 @@
       return rec;
     }
 
+    function getRecordSignature(r) {
+      return [
+        (r.actualDate || "").trim(),
+        (r.budgetedDate || "").trim(),
+        (r.task || "").trim().toLowerCase(),
+        (r.cat1 || "").trim().toLowerCase(),
+        r.actualAmount !== null && r.actualAmount !== undefined ? Number(r.actualAmount).toFixed(2) : "",
+        r.budgetAmount !== null && r.budgetAmount !== undefined ? Number(r.budgetAmount).toFixed(2) : "",
+        r.income !== null && r.income !== undefined ? Number(r.income).toFixed(2) : "",
+        r.investment !== null && r.investment !== undefined ? Number(r.investment).toFixed(2) : ""
+      ].join("|");
+    }
+
+    function deduplicateRecords(list) {
+      const byId = new Map();
+      list.forEach(item => {
+        const rec = computeRecordFields(item);
+        const existing = byId.get(rec.id);
+        if (!existing || (rec.updatedAt || "") >= (existing.updatedAt || "")) {
+          byId.set(rec.id, rec);
+        }
+      });
+
+      const bySig = new Map();
+      byId.forEach(rec => {
+        const sig = getRecordSignature(rec);
+        const existing = bySig.get(sig);
+        if (!existing) {
+          bySig.set(sig, rec);
+        } else {
+          // Prefer Paid over Pending, or newer updatedAt
+          const keepNew = (rec.payment === "Paid" && existing.payment !== "Paid") ||
+            (rec.payment === existing.payment && (rec.updatedAt || "") > (existing.updatedAt || ""));
+          if (keepNew) bySig.set(sig, rec);
+        }
+      });
+      return Array.from(bySig.values());
+    }
+
     function isRecordOverdue(rec) {
       if (rec.payment !== "Pending" || !rec.budgetedDate) return false;
       return rec.budgetedDate < getTodayISO();
@@ -1737,7 +1778,7 @@
         if (savedRecords) {
           const parsed = JSON.parse(savedRecords);
           if (Array.isArray(parsed)) {
-            records = parsed.map(computeRecordFields);
+            records = deduplicateRecords(parsed);
           }
         } else {
           records = getInitialSampleRecords().map(computeRecordFields);
@@ -2214,6 +2255,7 @@
           remarks: remarks || records[pendingMatchIdx].remarks,
           updatedAt: new Date().toISOString()
         });
+        pushSingleRecordToSupabase(records[pendingMatchIdx]);
         showToast("Matched & settled pending budget", "success");
       } else {
         const newRec = computeRecordFields({
@@ -2235,6 +2277,7 @@
           remarks
         });
         records.push(newRec);
+        pushSingleRecordToSupabase(newRec);
         showToast("Actual entry saved", "success");
       }
 
@@ -2243,7 +2286,7 @@
         saveMasterToStorage();
       }
 
-      saveRecordsToStorage(true);
+      saveRecordsToStorage(false);
       resetQuickActualForm();
       refreshAllViews();
     }
@@ -2329,6 +2372,7 @@
         saveMasterToStorage();
       }
 
+      records = deduplicateRecords(records);
       saveRecordsToStorage(true);
       resetPlanBudgetForm();
       refreshAllViews();
@@ -2519,7 +2563,8 @@
         actualAmount: r.budgetAmount || 0,
         updatedAt: new Date().toISOString()
       });
-      saveRecordsToStorage(true);
+      saveRecordsToStorage(false);
+      pushSingleRecordToSupabase(records[idx]);
       refreshAllViews();
       showToast("Marked as Paid", "success");
     }
@@ -2581,7 +2626,8 @@
         updatedAt: new Date().toISOString()
       });
 
-      saveRecordsToStorage(true);
+      saveRecordsToStorage(false);
+      pushSingleRecordToSupabase(records[idx]);
       closeActualizeModal();
       refreshAllViews();
       if (activeDrilldownContext && !document.getElementById("category-drilldown-drawer")?.classList.contains("hidden")) {
@@ -3473,9 +3519,10 @@
             records.push(rec);
             importedCount++;
           }
+          records = deduplicateRecords(records);
           saveRecordsToStorage(true);
           refreshAllViews();
-          showToast(`Imported ${importedCount} records`, "success");
+          showToast(`Imported ${records.length} unique records`, "success");
         } catch (err) {
           console.error(err);
           showToast("Failed to parse CSV", "error");
@@ -3500,7 +3547,7 @@
         try {
           const data = JSON.parse(String(e.target.result || "{}"));
           if (Array.isArray(data.records)) {
-            records = data.records.map(computeRecordFields);
+            records = deduplicateRecords(data.records);
             if (data.masterData) {
               masterData = data.masterData;
               saveMasterToStorage();
@@ -3691,14 +3738,14 @@
     /* ===================================================================== */
     function getCurrentMonthPendingBudgetCount() {
       const now = new Date();
+      const curPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
       const curYear = String(now.getFullYear());
       const curMonth = MONTHS_SHORT[now.getMonth()];
-      return records.filter(r =>
-        r.payment === "Pending" &&
-        (r.budgetAmount || 0) > 0 &&
-        r.budgetYear === curYear &&
-        r.budgetMonth === curMonth
-      ).length;
+      return records.filter(r => {
+        if (r.payment !== "Pending" || (r.budgetAmount || 0) <= 0) return false;
+        if (r.budgetedDate && r.budgetedDate.startsWith(curPrefix)) return true;
+        return r.budgetYear === curYear && r.budgetMonth === curMonth;
+      }).length;
     }
 
     function updateNotificationBadges() {
@@ -3767,6 +3814,7 @@
       const connectedBar = document.getElementById("cloud-connected-bar");
       const emailEl = document.getElementById("cloud-user-email");
       const syncEl = document.getElementById("cloud-last-sync");
+      const headerSyncBtn = document.getElementById("btn-header-sync");
 
       if (badge) {
         badge.textContent = label;
@@ -3777,10 +3825,12 @@
       if (supabaseUser) {
         if (setupForm) setupForm.classList.add("hidden");
         if (connectedBar) connectedBar.classList.remove("hidden");
+        if (headerSyncBtn) headerSyncBtn.classList.remove("hidden");
         if (emailEl) emailEl.textContent = email || supabaseUser.email || "";
       } else {
         if (setupForm) setupForm.classList.remove("hidden");
         if (connectedBar) connectedBar.classList.add("hidden");
+        if (headerSyncBtn) headerSyncBtn.classList.add("hidden");
         if (syncEl) syncEl.textContent = "";
       }
     }
@@ -3887,11 +3937,40 @@
     function scheduleCloudSync() {
       if (!supabaseClient || !supabaseUser) return;
       clearTimeout(cloudSyncTimer);
-      cloudSyncTimer = setTimeout(() => syncCloudNow(false), 1200);
+      cloudSyncTimer = setTimeout(() => syncCloudNow(false), 1500);
+    }
+
+    async function pushSingleRecordToSupabase(rec) {
+      if (!supabaseClient || !supabaseUser || !rec) return;
+      try {
+        const { error } = await supabaseClient
+          .from("oro_records")
+          .upsert({
+            id: rec.id,
+            user_id: supabaseUser.id,
+            payload: rec,
+            updated_at: rec.updatedAt || new Date().toISOString()
+          }, { onConflict: "user_id,id" });
+        if (error) throw error;
+        const timeLabel = `Synced ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+        updateCloudStatusUI(
+          "Synced",
+          "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
+          supabaseUser.email,
+          timeLabel
+        );
+      } catch (err) {
+        updateCloudStatusUI(
+          "Sync Pending",
+          "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
+          supabaseUser.email
+        );
+      }
     }
 
     async function syncCloudNow(notify = false) {
-      if (!supabaseClient || !supabaseUser) return;
+      if (!supabaseClient || !supabaseUser || isCloudSyncing) return;
+      isCloudSyncing = true;
       try {
         updateCloudStatusUI(
           "Syncing...",
@@ -3899,42 +3978,68 @@
           supabaseUser.email
         );
 
-        // 1. Pull remote rows
-        const { data: remoteRows, error: pullErr } = await supabaseClient
-          .from("oro_records")
-          .select("id, payload, updated_at")
-          .eq("user_id", supabaseUser.id);
+        // 1. Paginated pull of ALL remote rows (prevents 1,000-row Supabase cap)
+        let remoteRows = [];
+        let fromIdx = 0;
+        const pageSize = 1000;
+        while (true) {
+          const { data: pageData, error: pullErr } = await supabaseClient
+            .from("oro_records")
+            .select("id, payload, updated_at")
+            .eq("user_id", supabaseUser.id)
+            .range(fromIdx, fromIdx + pageSize - 1);
+          if (pullErr) throw pullErr;
+          if (!pageData || pageData.length === 0) break;
+          remoteRows = remoteRows.concat(pageData);
+          if (pageData.length < pageSize) break;
+          fromIdx += pageSize;
+        }
 
-        if (pullErr) throw pullErr;
-
-        const mergedMap = new Map();
-        records.forEach(r => mergedMap.set(r.id, r));
-
-        (remoteRows || []).forEach(row => {
+        const remoteIds = new Set();
+        const combined = [...records];
+        remoteRows.forEach(row => {
           const remoteRec = computeRecordFields(row.payload || {});
-          const localRec = mergedMap.get(remoteRec.id);
-          if (!localRec || (remoteRec.updatedAt || "") > (localRec.updatedAt || "")) {
-            mergedMap.set(remoteRec.id, remoteRec);
-          }
+          remoteIds.add(remoteRec.id);
+          combined.push(remoteRec);
         });
 
-        records = Array.from(mergedMap.values());
+        // Deduplicate by ID and transaction signature so mobile & desktop stay identical
+        const deduplicated = deduplicateRecords(combined);
+        const keptIds = new Set(deduplicated.map(r => r.id));
+        records = deduplicated;
         saveRecordsToStorage(false);
 
-        // 2. Push merged rows in batches of 250
-        const upsertRows = records.map(r => ({
-          id: r.id,
-          user_id: supabaseUser.id,
-          payload: r,
-          updated_at: r.updatedAt || new Date().toISOString()
-        }));
-
-        for (let i = 0; i < upsertRows.length; i += 250) {
-          const chunk = upsertRows.slice(i, i + 250);
-          const { error: pushErr } = await supabaseClient
+        // Clean up any duplicate rows in Supabase that were merged away
+        const duplicateRemoteIds = Array.from(remoteIds).filter(id => !keptIds.has(id));
+        for (let i = 0; i < duplicateRemoteIds.length; i += 200) {
+          const delChunk = duplicateRemoteIds.slice(i, i + 200);
+          await supabaseClient
             .from("oro_records")
-            .upsert(chunk, { onConflict: "user_id,id" });
-          if (pushErr) throw pushErr;
+            .delete()
+            .eq("user_id", supabaseUser.id)
+            .in("id", delChunk);
+        }
+
+        // 2. Push only records that aren't already in remoteIds (avoids re-uploading 1,000+ rows on every open)
+        const toPush = notify
+          ? records
+          : records.filter(r => !remoteIds.has(r.id));
+
+        if (toPush.length > 0) {
+          const upsertRows = toPush.map(r => ({
+            id: r.id,
+            user_id: supabaseUser.id,
+            payload: r,
+            updated_at: r.updatedAt || new Date().toISOString()
+          }));
+
+          for (let i = 0; i < upsertRows.length; i += 250) {
+            const chunk = upsertRows.slice(i, i + 250);
+            const { error: pushErr } = await supabaseClient
+              .from("oro_records")
+              .upsert(chunk, { onConflict: "user_id,id" });
+            if (pushErr) throw pushErr;
+          }
         }
 
         const timeLabel = `Synced ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
@@ -3953,6 +4058,8 @@
           supabaseUser.email
         );
         if (notify) showToast(err.message || "Cloud sync failed", "error");
+      } finally {
+        isCloudSyncing = false;
       }
     }
 
@@ -4026,14 +4133,7 @@
       lastScrollY = curY;
     }, { passive: true });
 
-    // Pull latest cloud changes when returning to the mobile tab
-    document.addEventListener("visibilitychange", () => {
-      if (!document.hidden && supabaseClient && supabaseUser) {
-        syncCloudNow(false);
-      }
-    });
-
-    // Bootstrap App
+    // Bootstrap App (Sync runs once on open to save mobile battery & prevent heating)
     window.addEventListener("DOMContentLoaded", () => {
       loadStateFromStorage();
       applyTheme(appSettings.theme);
