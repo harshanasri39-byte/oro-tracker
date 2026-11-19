@@ -28,9 +28,9 @@
   <!-- Lucide Icons & Chart.js -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- Dynamic PWA Manifest -->
+  <!-- Dynamic PWA Manifest & ORO Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230f172a'/%3E%3Ctext x='32' y='39' text-anchor='middle' font-family='Inter,system-ui,-apple-system,sans-serif' font-weight='900' font-size='21' letter-spacing='-1' fill='%23ffffff'%3EORO%3C/text%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='42' fill='%230f172a'/%3E%3Ctext x='90' y='108' text-anchor='middle' font-family='Inter,system-ui,-apple-system,sans-serif' font-weight='900' font-size='58' letter-spacing='-2' fill='%23ffffff'%3EORO%3C/text%3E%3C/svg%3E" />
   <link rel="manifest" id="pwa-manifest" />
   <meta name="theme-color" content="#0f172a" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -205,7 +205,7 @@
                   <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400">Amount</label>
                   <span id="calc-preview-qa-actual-amount" class="hidden text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/80 px-2 py-0.5 rounded-full"></span>
                 </div>
-                <input type="text" id="qa-actual-amount" inputmode="text"
+                <input type="text" id="qa-actual-amount" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true"
                   onblur="commitMathInput(this)"
                   oninput="previewMathInput(this)" onkeydown="handleMathKeydown(event, this)"
                   class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-3 text-lg font-extrabold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all tabular-nums" />
@@ -302,7 +302,7 @@
                     <label class="text-[11px] font-bold text-sky-700 dark:text-sky-400">Income</label>
                     <span id="calc-preview-qa-income" class="hidden text-[10px] font-bold text-sky-700 dark:text-sky-300"></span>
                   </div>
-                  <input type="text" id="qa-income" inputmode="text"
+                  <input type="text" id="qa-income" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true"
                     onblur="commitMathInput(this)"
                     oninput="previewMathInput(this)" onkeydown="handleMathKeydown(event, this)"
                     class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-bold text-slate-900 dark:text-white outline-none tabular-nums" />
@@ -313,7 +313,7 @@
                     <label class="text-[11px] font-bold text-emerald-700 dark:text-emerald-400">Investment</label>
                     <span id="calc-preview-qa-investment" class="hidden text-[10px] font-bold text-emerald-700 dark:text-emerald-300"></span>
                   </div>
-                  <input type="text" id="qa-investment" inputmode="text"
+                  <input type="text" id="qa-investment" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true"
                     onblur="commitMathInput(this)"
                     oninput="previewMathInput(this)" onkeydown="handleMathKeydown(event, this)"
                     class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-bold text-slate-900 dark:text-white outline-none tabular-nums" />
@@ -324,7 +324,7 @@
                     <label class="text-[11px] font-bold text-slate-600 dark:text-slate-400">USD</label>
                     <span id="calc-preview-qa-usd" class="hidden text-[10px] font-bold text-slate-600 dark:text-slate-300"></span>
                   </div>
-                  <input type="text" id="qa-usd" inputmode="text"
+                  <input type="text" id="qa-usd" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true"
                     onblur="commitMathInput(this)"
                     oninput="previewMathInput(this)" onkeydown="handleMathKeydown(event, this)"
                     class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-bold text-slate-900 dark:text-white outline-none tabular-nums" />
@@ -335,7 +335,7 @@
                     <label class="text-[11px] font-bold text-slate-600 dark:text-slate-400">GBP</label>
                     <span id="calc-preview-qa-gbp" class="hidden text-[10px] font-bold text-slate-600 dark:text-slate-300"></span>
                   </div>
-                  <input type="text" id="qa-gbp" inputmode="text"
+                  <input type="text" id="qa-gbp" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true"
                     onblur="commitMathInput(this)"
                     oninput="previewMathInput(this)" onkeydown="handleMathKeydown(event, this)"
                     class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-bold text-slate-900 dark:text-white outline-none tabular-nums" />
@@ -451,7 +451,7 @@
                   <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400">Amount *</label>
                   <span id="calc-preview-pb-budget-amount" class="hidden text-[11px] font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950 px-2 py-0.5 rounded-full"></span>
                 </div>
-                <input type="text" id="pb-budget-amount" required inputmode="text"
+                <input type="text" id="pb-budget-amount" required inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true"
                   onblur="commitMathInput(this)"
                   oninput="previewMathInput(this)" onkeydown="handleMathKeydown(event, this)"
                   class="w-full rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-3 text-base font-extrabold text-slate-900 dark:text-white outline-none tabular-nums" />
@@ -1146,7 +1146,7 @@
               <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400">Actual Amount</label>
               <span id="calc-preview-mod-actual-amount" class="hidden text-[10px] font-bold text-emerald-700 dark:text-emerald-300"></span>
             </div>
-            <input type="text" id="mod-actual-amount" inputmode="text"
+            <input type="text" id="mod-actual-amount" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true"
               onblur="commitMathInput(this)"
               oninput="previewMathInput(this)" onkeydown="handleMathKeydown(event, this)"
               class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2.5 text-sm font-extrabold text-slate-900 dark:text-white outline-none tabular-nums" />
@@ -1175,7 +1175,7 @@
               <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400">Budget Amount</label>
               <span id="calc-preview-mod-budget-amount" class="hidden text-[10px] font-bold text-indigo-700 dark:text-indigo-300"></span>
             </div>
-            <input type="text" id="mod-budget-amount" inputmode="text"
+            <input type="text" id="mod-budget-amount" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true"
               onblur="commitMathInput(this)"
               oninput="previewMathInput(this)" onkeydown="handleMathKeydown(event, this)"
               class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none tabular-nums" />
@@ -1185,22 +1185,22 @@
         <div class="grid grid-cols-4 gap-2">
           <div>
             <label class="block text-[10px] font-bold text-sky-600 mb-1">Income</label>
-            <input type="text" id="mod-income" inputmode="text" onblur="commitMathInput(this)"
+            <input type="text" id="mod-income" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" onblur="commitMathInput(this)"
               class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-2.5 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none" />
           </div>
           <div>
             <label class="block text-[10px] font-bold text-emerald-600 mb-1">Invest</label>
-            <input type="text" id="mod-investment" inputmode="text" onblur="commitMathInput(this)"
+            <input type="text" id="mod-investment" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" onblur="commitMathInput(this)"
               class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-2.5 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none" />
           </div>
           <div>
             <label class="block text-[10px] font-bold text-slate-500 mb-1">USD</label>
-            <input type="text" id="mod-usd" inputmode="text" onblur="commitMathInput(this)"
+            <input type="text" id="mod-usd" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" onblur="commitMathInput(this)"
               class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-2.5 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none" />
           </div>
           <div>
             <label class="block text-[10px] font-bold text-slate-500 mb-1">GBP</label>
-            <input type="text" id="mod-gbp" inputmode="text" onblur="commitMathInput(this)"
+            <input type="text" id="mod-gbp" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" onblur="commitMathInput(this)"
               class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-2.5 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none" />
           </div>
         </div>
