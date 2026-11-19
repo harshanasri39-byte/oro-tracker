@@ -25,9 +25,10 @@
     };
   </script>
 
-  <!-- Lucide Icons & Chart.js -->
+  <!-- Lucide Icons, Chart.js & Supabase JS v2 -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <!-- Dynamic PWA Manifest & ORO Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230f172a'/%3E%3Ctext x='32' y='39' text-anchor='middle' font-family='Inter,system-ui,-apple-system,sans-serif' font-weight='900' font-size='21' letter-spacing='-1' fill='%23ffffff'%3EORO%3C/text%3E%3C/svg%3E" />
   <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='42' fill='%230f172a'/%3E%3Ctext x='90' y='108' text-anchor='middle' font-family='Inter,system-ui,-apple-system,sans-serif' font-weight='900' font-size='58' letter-spacing='-2' fill='%23ffffff'%3EORO%3C/text%3E%3C/svg%3E" />
@@ -3763,35 +3764,62 @@
       }
     }
 
-    /* ===================================================================== */
-    /* SUPABASE CLOUD SYNC (1-USER AUTOMATIC BACKUP)                         */
-    /* ===================================================================== */
-    function updateCloudStatusUI(statusText, badgeColorClass, userEmail = "", lastSyncText = "") {
+    function updateCloudStatusUI(label, badgeClasses, email = "", syncText = "") {
       const badge = document.getElementById("cloud-status-badge");
       const setupForm = document.getElementById("cloud-setup-form");
       const connectedBar = document.getElementById("cloud-connected-bar");
       const emailEl = document.getElementById("cloud-user-email");
-      const lastEl = document.getElementById("cloud-last-sync");
+      const syncEl = document.getElementById("cloud-last-sync");
 
       if (badge) {
-        badge.textContent = statusText;
-        badge.className = `px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${badgeColorClass}`;
+        badge.textContent = label;
+        badge.className = `px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${badgeClasses}`;
       }
-      if (userEmail) {
+      if (syncEl && syncText) syncEl.textContent = syncText;
+
+      if (supabaseUser) {
         if (setupForm) setupForm.classList.add("hidden");
         if (connectedBar) connectedBar.classList.remove("hidden");
-        if (emailEl) emailEl.textContent = userEmail;
+        if (emailEl) emailEl.textContent = email || supabaseUser.email || "";
       } else {
         if (setupForm) setupForm.classList.remove("hidden");
         if (connectedBar) connectedBar.classList.add("hidden");
+        if (syncEl) syncEl.textContent = "";
       }
-      if (lastEl && lastSyncText) lastEl.textContent = lastSyncText;
+    }
+
+    async function ensureSupabaseSDK() {
+      if (window.supabase && typeof window.supabase.createClient === "function") {
+        return window.supabase;
+      }
+      const cdns = [
+        "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js",
+        "https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"
+      ];
+      for (const src of cdns) {
+        try {
+          await new Promise((resolve, reject) => {
+            const s = document.createElement("script");
+            s.src = src;
+            s.async = true;
+            s.onload = resolve;
+            s.onerror = reject;
+            document.head.appendChild(s);
+          });
+          if (window.supabase && typeof window.supabase.createClient === "function") {
+            return window.supabase;
+          }
+        } catch (e) {
+          console.warn("Supabase CDN retry:", src);
+        }
+      }
+      throw new Error("Could not load Cloud Sync library — check internet connection and refresh");
     }
 
     async function initSupabaseFromSavedConfig() {
       try {
         const raw = localStorage.getItem(STORAGE_KEYS.CLOUD);
-        if (!raw || !window.supabase) return;
+        if (!raw) return;
         const cfg = JSON.parse(raw);
         if (!cfg.url || !cfg.key) return;
 
@@ -3800,7 +3828,8 @@
         if (urlEl) urlEl.value = cfg.url;
         if (keyEl) keyEl.value = cfg.key;
 
-        supabaseClient = window.supabase.createClient(cfg.url, cfg.key);
+        const sb = await ensureSupabaseSDK();
+        supabaseClient = sb.createClient(cfg.url, cfg.key);
         const { data } = await supabaseClient.auth.getSession();
         if (data?.session?.user) {
           supabaseUser = data.session.user;
@@ -3828,8 +3857,9 @@
       }
 
       try {
+        const sb = await ensureSupabaseSDK();
         localStorage.setItem(STORAGE_KEYS.CLOUD, JSON.stringify({ url, key }));
-        supabaseClient = window.supabase.createClient(url, key);
+        supabaseClient = sb.createClient(url, key);
         const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error) throw error;
 
