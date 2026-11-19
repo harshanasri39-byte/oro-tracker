@@ -515,57 +515,77 @@
           <h1 class="hidden md:block text-xl font-extrabold text-slate-900 dark:text-white tracking-tight shrink-0">Dashboard</h1>
 
           <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full md:w-auto">
-            <select id="dash-year" onchange="renderDashboard()"
-              class="w-full sm:w-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
-              <option value="ALL">All Years</option>
-            </select>
-
-            <select id="dash-month" onchange="renderDashboard()"
-              class="w-full sm:w-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
-              <option value="ALL">All Months</option>
-              <option value="Jan">Jan</option><option value="Feb">Feb</option><option value="Mar">Mar</option>
-              <option value="Apr">Apr</option><option value="May">May</option><option value="Jun">Jun</option>
-              <option value="Jul">Jul</option><option value="Aug">Aug</option><option value="Sep">Sep</option>
-              <option value="Oct">Oct</option><option value="Nov">Nov</option><option value="Dec">Dec</option>
-            </select>
-
-            <!-- Multi-Select Category Checkbox Dropdown (All Ticked by Default) -->
+            <!-- 1. Category Multi-Select Dropdown -->
             <div class="relative w-full sm:w-auto" id="dash-cat1-wrapper">
               <button type="button" onclick="toggleDashMultiDropdown('dash-cat1-menu')" id="dash-cat1-btn"
                 class="w-full sm:w-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none flex items-center justify-between gap-2 cursor-pointer">
-                <span id="dash-cat1-label" class="truncate">All Categories</span>
+                <span id="dash-cat1-label" class="truncate">Category</span>
                 <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
               </button>
               <div id="dash-cat1-menu" class="cat-combo-menu hidden absolute z-30 left-0 mt-1.5 w-60 max-h-64 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl p-2 space-y-1">
                 <div class="flex items-center justify-between px-2 py-1 border-b border-slate-100 dark:border-slate-800 text-[11px] font-bold">
-                  <button type="button" onclick="setAllDashCategories('cat1', true)" class="text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer">Select All</button>
-                  <button type="button" onclick="setAllDashCategories('cat1', false)" class="text-slate-500 hover:underline cursor-pointer">Clear</button>
+                  <button type="button" onclick="setAllDashFilterItems('cat1', true)" class="text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer">Select All</button>
+                  <button type="button" onclick="setAllDashFilterItems('cat1', false)" class="text-slate-500 hover:underline cursor-pointer">Clear</button>
                 </div>
                 <div id="dash-cat1-options" class="space-y-0.5 pt-1"></div>
               </div>
             </div>
 
-            <!-- Multi-Select Alt Category Checkbox Dropdown (All Ticked by Default) -->
+            <!-- 2. Alt Category Multi-Select Dropdown -->
             <div class="relative w-full sm:w-auto" id="dash-cat2-wrapper">
               <button type="button" onclick="toggleDashMultiDropdown('dash-cat2-menu')" id="dash-cat2-btn"
                 class="w-full sm:w-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none flex items-center justify-between gap-2 cursor-pointer">
-                <span id="dash-cat2-label" class="truncate">All Alt Categories</span>
+                <span id="dash-cat2-label" class="truncate">Alt Category</span>
                 <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
               </button>
               <div id="dash-cat2-menu" class="cat-combo-menu hidden absolute z-30 right-0 sm:left-0 sm:right-auto mt-1.5 w-60 max-h-64 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl p-2 space-y-1">
                 <div class="flex items-center justify-between px-2 py-1 border-b border-slate-100 dark:border-slate-800 text-[11px] font-bold">
-                  <button type="button" onclick="setAllDashCategories('cat2', true)" class="text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer">Select All</button>
-                  <button type="button" onclick="setAllDashCategories('cat2', false)" class="text-slate-500 hover:underline cursor-pointer">Clear</button>
+                  <button type="button" onclick="setAllDashFilterItems('cat2', true)" class="text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer">Select All</button>
+                  <button type="button" onclick="setAllDashFilterItems('cat2', false)" class="text-slate-500 hover:underline cursor-pointer">Clear</button>
                 </div>
                 <div id="dash-cat2-options" class="space-y-0.5 pt-1"></div>
               </div>
             </div>
 
+            <!-- 3. Year Multi-Select Dropdown (Oldest to Newest) -->
+            <div class="relative w-full sm:w-auto" id="dash-year-wrapper">
+              <button type="button" onclick="toggleDashMultiDropdown('dash-year-menu')" id="dash-year-btn"
+                class="w-full sm:w-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none flex items-center justify-between gap-2 cursor-pointer">
+                <span id="dash-year-label" class="truncate">Year</span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
+              </button>
+              <div id="dash-year-menu" class="cat-combo-menu hidden absolute z-30 left-0 mt-1.5 w-48 max-h-64 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl p-2 space-y-1">
+                <div class="flex items-center justify-between px-2 py-1 border-b border-slate-100 dark:border-slate-800 text-[11px] font-bold">
+                  <button type="button" onclick="setAllDashFilterItems('year', true)" class="text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer">Select All</button>
+                  <button type="button" onclick="setAllDashFilterItems('year', false)" class="text-slate-500 hover:underline cursor-pointer">Clear</button>
+                </div>
+                <div id="dash-year-options" class="space-y-0.5 pt-1"></div>
+              </div>
+            </div>
+
+            <!-- 4. Month Multi-Select Dropdown -->
+            <div class="relative w-full sm:w-auto" id="dash-month-wrapper">
+              <button type="button" onclick="toggleDashMultiDropdown('dash-month-menu')" id="dash-month-btn"
+                class="w-full sm:w-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none flex items-center justify-between gap-2 cursor-pointer">
+                <span id="dash-month-label" class="truncate">Month</span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
+              </button>
+              <div id="dash-month-menu" class="cat-combo-menu hidden absolute z-30 right-0 sm:left-0 sm:right-auto mt-1.5 w-48 max-h-64 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl p-2 space-y-1">
+                <div class="flex items-center justify-between px-2 py-1 border-b border-slate-100 dark:border-slate-800 text-[11px] font-bold">
+                  <button type="button" onclick="setAllDashFilterItems('month', true)" class="text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer">Select All</button>
+                  <button type="button" onclick="setAllDashFilterItems('month', false)" class="text-slate-500 hover:underline cursor-pointer">Clear</button>
+                </div>
+                <div id="dash-month-options" class="space-y-0.5 pt-1"></div>
+              </div>
+            </div>
+
+            <!-- 5. Tag -->
             <select id="dash-tag" onchange="renderDashboard()"
               class="w-full sm:w-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
-              <option value="ALL">All Tags</option>
+              <option value="ALL">Tag</option>
             </select>
 
+            <!-- 6. As of Today -->
             <label class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
               <input type="checkbox" id="dash-as-of-today" checked onchange="renderDashboard()" class="rounded text-indigo-600 w-3.5 h-3.5" />
               <span>As of Today</span>
@@ -1334,6 +1354,8 @@
     let pivotSortState = { key: "spent", dir: "desc" };
     let excludedDashCategories = new Set();
     let excludedDashAltCategories = new Set();
+    let excludedDashYears = new Set();
+    let excludedDashMonths = new Set();
     let supabaseClient = null;
     let supabaseUser = null;
     let cloudSyncTimer = null;
@@ -2490,6 +2512,17 @@
     /* ===================================================================== */
     /* DASHBOARD ANALYTICS & CHARTS                                          */
     /* ===================================================================== */
+    function getDashSortedYearsAsc() {
+      const years = new Set([String(new Date().getFullYear())]);
+      records.forEach(r => {
+        if (r.expenseYear) years.add(r.expenseYear);
+        if (r.budgetYear) years.add(r.budgetYear);
+        if (r.incomeYear) years.add(r.incomeYear);
+        if (r.investmentYear) years.add(r.investmentYear);
+      });
+      return Array.from(years).filter(Boolean).sort((a, b) => a.localeCompare(b));
+    }
+
     function toggleDashMultiDropdown(menuId) {
       const menu = document.getElementById(menuId);
       if (!menu) return;
@@ -2498,56 +2531,91 @@
       if (wasHidden) menu.classList.remove("hidden");
     }
 
-    function toggleDashCategory(dim, catName, isChecked) {
-      const targetSet = dim === "cat2" ? excludedDashAltCategories : excludedDashCategories;
-      if (isChecked) {
-        targetSet.delete(catName);
-      } else {
-        targetSet.add(catName);
-      }
-      updateDashCatButtonLabel(dim);
-      renderDashboard();
-    }
-
-    function setAllDashCategories(dim, selectAll) {
-      const allCats = getSortedCategories();
+    function getDashFilterConfig(dim) {
       if (dim === "cat2") {
-        excludedDashAltCategories = selectAll ? new Set() : new Set(allCats);
-        document.querySelectorAll(".dash-cat2-chk").forEach(cb => { cb.checked = selectAll; });
-      } else {
-        excludedDashCategories = selectAll ? new Set() : new Set(allCats);
-        document.querySelectorAll(".dash-cat1-chk").forEach(cb => { cb.checked = selectAll; });
+        return {
+          set: excludedDashAltCategories,
+          allItems: getSortedCategories(),
+          labelId: "dash-cat2-label",
+          chkClass: ".dash-cat2-chk",
+          baseLabel: "Alt Category",
+          noneLabel: "No Alt Category",
+          pluralLabel: "Alt Categories"
+        };
       }
-      updateDashCatButtonLabel(dim);
+      if (dim === "year") {
+        return {
+          set: excludedDashYears,
+          allItems: getDashSortedYearsAsc(),
+          labelId: "dash-year-label",
+          chkClass: ".dash-year-chk",
+          baseLabel: "Year",
+          noneLabel: "No Year",
+          pluralLabel: "Years"
+        };
+      }
+      if (dim === "month") {
+        return {
+          set: excludedDashMonths,
+          allItems: MONTHS_SHORT,
+          labelId: "dash-month-label",
+          chkClass: ".dash-month-chk",
+          baseLabel: "Month",
+          noneLabel: "No Month",
+          pluralLabel: "Months"
+        };
+      }
+      return {
+        set: excludedDashCategories,
+        allItems: getSortedCategories(),
+        labelId: "dash-cat1-label",
+        chkClass: ".dash-cat1-chk",
+        baseLabel: "Category",
+        noneLabel: "No Category",
+        pluralLabel: "Categories"
+      };
+    }
+
+    function toggleDashFilterItem(dim, val, isChecked) {
+      const cfg = getDashFilterConfig(dim);
+      if (isChecked) {
+        cfg.set.delete(val);
+      } else {
+        cfg.set.add(val);
+      }
+      updateDashFilterLabel(dim);
       renderDashboard();
     }
 
-    function updateDashCatButtonLabel(dim = "cat1") {
-      const isAlt = dim === "cat2";
-      const labelEl = document.getElementById(isAlt ? "dash-cat2-label" : "dash-cat1-label");
-      const targetSet = isAlt ? excludedDashAltCategories : excludedDashCategories;
-      const allLabel = isAlt ? "All Alt Categories" : "All Categories";
-      const noneLabel = isAlt ? "No Alt Categories" : "No Categories";
-      const multiLabel = isAlt ? "Alt Categories" : "Categories";
+    function setAllDashFilterItems(dim, selectAll) {
+      const cfg = getDashFilterConfig(dim);
+      cfg.set.clear();
+      if (!selectAll) {
+        cfg.allItems.forEach(item => cfg.set.add(item));
+      }
+      document.querySelectorAll(cfg.chkClass).forEach(cb => { cb.checked = selectAll; });
+      updateDashFilterLabel(dim);
+      renderDashboard();
+    }
+
+    function updateDashFilterLabel(dim) {
+      const cfg = getDashFilterConfig(dim);
+      const labelEl = document.getElementById(cfg.labelId);
       if (!labelEl) return;
 
-      const allCats = getSortedCategories();
-      const selectedCount = allCats.filter(c => !targetSet.has(c)).length;
-      if (targetSet.size === 0 || selectedCount === allCats.length) {
-        labelEl.textContent = allLabel;
-      } else if (selectedCount === 0) {
-        labelEl.textContent = noneLabel;
-      } else if (selectedCount === 1) {
-        const only = allCats.find(c => !targetSet.has(c));
-        labelEl.textContent = only || `1 ${multiLabel}`;
+      const selectedItems = cfg.allItems.filter(v => !cfg.set.has(v));
+      if (cfg.set.size === 0 || selectedItems.length === cfg.allItems.length) {
+        labelEl.textContent = cfg.baseLabel;
+      } else if (selectedItems.length === 0) {
+        labelEl.textContent = cfg.noneLabel;
+      } else if (selectedItems.length === 1) {
+        labelEl.textContent = selectedItems[0];
       } else {
-        labelEl.textContent = `${selectedCount} of ${allCats.length} ${multiLabel}`;
+        labelEl.textContent = `${selectedItems.length} of ${cfg.allItems.length} ${cfg.pluralLabel}`;
       }
     }
 
     function getFilteredDashboardRecords() {
-      const yFilter = document.getElementById("dash-year")?.value || "ALL";
-      const mFilter = document.getElementById("dash-month")?.value || "ALL";
       const tagFilter = document.getElementById("dash-tag")?.value || "ALL";
       const asOfToday = document.getElementById("dash-as-of-today")?.checked ?? true;
       const todayISO = getTodayISO();
@@ -2559,8 +2627,10 @@
         }
         const effYear = r.expenseYear || r.budgetYear || r.incomeYear || r.investmentYear;
         const effMonth = r.expenseMonth || r.budgetMonth || r.incomeMonth || r.investmentMonth;
-        if (yFilter !== "ALL" && effYear !== yFilter) return false;
-        if (mFilter !== "ALL" && effMonth !== mFilter) return false;
+        if (effYear && excludedDashYears.has(effYear)) return false;
+        if (!effYear && excludedDashYears.size > 0) return false;
+        if (effMonth && excludedDashMonths.has(effMonth)) return false;
+        if (!effMonth && excludedDashMonths.size > 0) return false;
         const rowCat1 = r.cat1 || "Uncategorized";
         if (excludedDashCategories.has(rowCat1)) return false;
         const rowCat2 = (r.cat2 || r.cat1) || "Uncategorized";
@@ -2571,13 +2641,15 @@
     }
 
     function resetDashboardFilters() {
-      document.getElementById("dash-year").value = "ALL";
-      document.getElementById("dash-month").value = "ALL";
       excludedDashCategories.clear();
       excludedDashAltCategories.clear();
-      document.querySelectorAll(".dash-cat1-chk, .dash-cat2-chk").forEach(cb => { cb.checked = true; });
-      updateDashCatButtonLabel("cat1");
-      updateDashCatButtonLabel("cat2");
+      excludedDashYears.clear();
+      excludedDashMonths.clear();
+      document.querySelectorAll(".dash-cat1-chk, .dash-cat2-chk, .dash-year-chk, .dash-month-chk").forEach(cb => { cb.checked = true; });
+      updateDashFilterLabel("cat1");
+      updateDashFilterLabel("cat2");
+      updateDashFilterLabel("year");
+      updateDashFilterLabel("month");
       document.getElementById("dash-tag").value = "ALL";
       const asOfEl = document.getElementById("dash-as-of-today");
       if (asOfEl) asOfEl.checked = true;
@@ -2590,13 +2662,11 @@
     }
 
     function renderDashboard() {
-      const yFilter = document.getElementById("dash-year")?.value || "ALL";
-      const mFilter = document.getElementById("dash-month")?.value || "ALL";
       const tagFilter = document.getElementById("dash-tag")?.value || "ALL";
       const asOfToday = document.getElementById("dash-as-of-today")?.checked ?? true;
       const yoyEnabled = document.getElementById("dash-yoy-toggle")?.checked || false;
 
-      const hasFilter = yFilter !== "ALL" || mFilter !== "ALL" || excludedDashCategories.size > 0 || excludedDashAltCategories.size > 0 || tagFilter !== "ALL" || !asOfToday;
+      const hasFilter = excludedDashCategories.size > 0 || excludedDashAltCategories.size > 0 || excludedDashYears.size > 0 || excludedDashMonths.size > 0 || tagFilter !== "ALL" || !asOfToday;
       const resetDesk = document.getElementById("btn-dash-reset");
       if (resetDesk) resetDesk.classList.toggle("hidden", !hasFilter);
 
@@ -2660,11 +2730,11 @@
         ovBadge.classList.toggle("hidden", overdueAsAtTodayCount === 0);
       }
 
-      renderDashboardCharts(filtered, yFilter, yoyEnabled);
+      renderDashboardCharts(filtered, yoyEnabled);
       renderDashboardPivot(filtered, totalSpent);
     }
 
-    function renderDashboardCharts(filtered, yFilter, yoyEnabled) {
+    function renderDashboardCharts(filtered, yoyEnabled) {
       const isDark = document.documentElement.classList.contains("dark");
       const gridColor = isDark ? "rgba(148, 163, 184, 0.12)" : "rgba(148, 163, 184, 0.2)";
       const textColor = isDark ? "#94a3b8" : "#64748b";
@@ -2695,16 +2765,14 @@
         let datasets = [];
 
         if (yoyEnabled) {
-          const maxYearCap = yFilter !== "ALL" ? parseInt(yFilter, 10) : currentYearNum;
-          const allYears = Array.from(new Set(
-            records
-              .filter(r => !asOfToday || !(r.actualDate || r.budgetedDate) || (r.actualDate || r.budgetedDate) <= todayISO)
-              .map(r => r.expenseYear || r.budgetYear)
-              .filter(yr => yr && parseInt(yr, 10) <= maxYearCap)
-          )).sort();
+          const selectedYears = getDashSortedYearsAsc().filter(yr => !excludedDashYears.has(yr));
+          const maxYearCap = selectedYears.length > 0
+            ? Math.max(...selectedYears.map(y => parseInt(y, 10)))
+            : currentYearNum;
+          const allYears = selectedYears.filter(yr => parseInt(yr, 10) <= maxYearCap);
           const palette = ["#4f46e5", "#10b981", "#f59e0b", "#0ea5e9", "#8b5cf6"];
           datasets = allYears.map((yr, idx) => {
-            const yrRecords = records.filter(r => (r.expenseYear || r.budgetYear) === yr);
+            const yrRecords = filtered.filter(r => (r.expenseYear || r.budgetYear) === yr);
             const monthly = buildBoundedMonthlySeries(
               yrRecords,
               r => r.expenseMonth || r.budgetMonth,
@@ -3386,7 +3454,8 @@
         extractTagsFromRemarks(r.remarks).forEach(t => tags.add(t));
       });
 
-      const sortedYears = Array.from(years).sort((a, b) => b.localeCompare(a));
+      const sortedYearsDesc = Array.from(years).sort((a, b) => b.localeCompare(a));
+      const sortedYearsAsc = Array.from(years).sort((a, b) => a.localeCompare(b));
       const sortedCats1 = Array.from(cats1).sort((a, b) => a.localeCompare(b));
       const sortedCats2 = Array.from(cats2).sort((a, b) => a.localeCompare(b));
       const sortedTags = Array.from(tags).sort((a, b) => a.localeCompare(b));
@@ -3400,46 +3469,33 @@
         if (prev && [...el.options].some(o => o.value === prev)) el.value = prev;
       };
 
-      fillSelect("dash-year", sortedYears, "All Years");
-
-      // Populate multi-select Category checkboxes (all ticked by default)
-      const dashCatOptsEl = document.getElementById("dash-cat1-options");
-      if (dashCatOptsEl) {
-        dashCatOptsEl.innerHTML = sortedCats1.map(cat => {
-          const isChecked = !excludedDashCategories.has(cat);
+      const renderDashChecklist = (containerId, items, dim, chkClass, excludedSet) => {
+        const el = document.getElementById(containerId);
+        if (!el) return;
+        el.innerHTML = items.map(val => {
+          const isChecked = !excludedSet.has(val);
           return `
             <label class="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
-              <input type="checkbox" class="dash-cat1-chk rounded text-indigo-600 w-3.5 h-3.5" ${isChecked ? "checked" : ""}
-                onchange="toggleDashCategory('cat1', '${escapeAttr(cat)}', this.checked)" />
-              <span class="truncate">${escapeHtml(cat)}</span>
+              <input type="checkbox" class="${chkClass} rounded text-indigo-600 w-3.5 h-3.5" ${isChecked ? "checked" : ""}
+                onchange="toggleDashFilterItem('${dim}', '${escapeAttr(val)}', this.checked)" />
+              <span class="truncate">${escapeHtml(val)}</span>
             </label>
           `;
         }).join("");
-        updateDashCatButtonLabel("cat1");
-      }
+        updateDashFilterLabel(dim);
+      };
 
-      // Populate multi-select Alt Category checkboxes (all ticked by default)
-      const dashAltCatOptsEl = document.getElementById("dash-cat2-options");
-      if (dashAltCatOptsEl) {
-        dashAltCatOptsEl.innerHTML = sortedCats2.map(cat => {
-          const isChecked = !excludedDashAltCategories.has(cat);
-          return `
-            <label class="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
-              <input type="checkbox" class="dash-cat2-chk rounded text-indigo-600 w-3.5 h-3.5" ${isChecked ? "checked" : ""}
-                onchange="toggleDashCategory('cat2', '${escapeAttr(cat)}', this.checked)" />
-              <span class="truncate">${escapeHtml(cat)}</span>
-            </label>
-          `;
-        }).join("");
-        updateDashCatButtonLabel("cat2");
-      }
+      renderDashChecklist("dash-cat1-options", sortedCats1, "cat1", "dash-cat1-chk", excludedDashCategories);
+      renderDashChecklist("dash-cat2-options", sortedCats2, "cat2", "dash-cat2-chk", excludedDashAltCategories);
+      renderDashChecklist("dash-year-options", sortedYearsAsc, "year", "dash-year-chk", excludedDashYears);
+      renderDashChecklist("dash-month-options", MONTHS_SHORT, "month", "dash-month-chk", excludedDashMonths);
 
-      fillSelect("dash-tag", sortedTags, "All Tags");
+      fillSelect("dash-tag", sortedTags, "Tag");
 
-      fillSelect("filter-year", sortedYears, "All Years");
+      fillSelect("filter-year", sortedYearsDesc, "All Years");
       fillSelect("filter-category", sortedCats1, "All Categories");
       fillSelect("filter-tag", sortedTags, "All Tags");
-      fillSelect("entry-filter-year", sortedYears, "All Years");
+      fillSelect("entry-filter-year", sortedYearsDesc, "All Years");
 
       fillSelect("pb-recurring", masterData.recurringOptions, null);
       fillSelect("pb-frequency", masterData.frequencies, null);
